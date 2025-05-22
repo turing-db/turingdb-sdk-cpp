@@ -88,10 +88,18 @@ execute_process(
         ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
 )
 
-# Threads
+# threads
 find_package(Threads REQUIRED)
+
+# threads
+find_package(CURL REQUIRED)
 
 # Python
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
+add_subdirectory(common/include)
+add_subdirectory(samples)
+add_subdirectory(turingcurlclient)
+add_subdirectory(requests)
 
 enable_testing()
