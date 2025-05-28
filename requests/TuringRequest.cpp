@@ -10,9 +10,13 @@ using namespace turingClient;
 using json = nlohmann::json;
 
 
+TuringRequest::TuringRequest(std::string& url)
+    :_url(url)
+{
+}
 
 void TuringRequest::listAvailableGraphs(std::vector<std::string>& result) {
-    RequestObject req = {HTTP_METHOD::POST, "http://127.0.0.1:6666", "/list_avail_graphs"};
+    RequestObject req = {HTTP_METHOD::POST, _url, "/list_avail_graphs"};
     auto func = [&result](char* ptr, size_t size, size_t nmemb, void* userdata) {
         json Doc {json::parse(ptr)};
 
@@ -28,7 +32,7 @@ void TuringRequest::listAvailableGraphs(std::vector<std::string>& result) {
 }
 
 void TuringRequest::listLoadedGraphs(std::vector<std::string>& result) {
-    RequestObject req = {HTTP_METHOD::POST, "127.0.0.1:6666", "/list_loaded_graphs"};
+    RequestObject req = {HTTP_METHOD::POST, _url, "/list_loaded_graphs"};
     auto func = [&result](char* ptr, size_t size, size_t nmemb, void* userdata) {
         json Doc {json::parse(ptr)};
 
@@ -44,7 +48,7 @@ void TuringRequest::listLoadedGraphs(std::vector<std::string>& result) {
 
 void TuringRequest::loadGraph(std::string_view graph) {
     auto loadGraphURI = "/load_graph?graph=" + std::string(graph);
-    RequestObject req = {HTTP_METHOD::POST, "127.0.0.1:6666", loadGraphURI};
+    RequestObject req = {HTTP_METHOD::POST, _url, loadGraphURI};
     auto func = [](char* ptr, size_t size, size_t nmemb, void* userdata) {
         return size * nmemb;
     };
@@ -53,7 +57,7 @@ void TuringRequest::loadGraph(std::string_view graph) {
 
 void TuringRequest::query(std::string& query, std::string& graph, std::vector<std::unique_ptr<TypedColumn>>& result) {
     auto queryURI = "/query?graph=" + graph;
-    RequestObject req = {HTTP_METHOD::POST, "127.0.0.1:6666", queryURI, query};
+    RequestObject req = {HTTP_METHOD::POST, _url, queryURI, query};
 
     auto func = [&result](char* ptr, size_t size, size_t nmemb, void* userdata) {
         json Doc {json::parse(ptr)};
@@ -65,23 +69,17 @@ void TuringRequest::query(std::string& query, std::string& graph, std::vector<st
         // check for errors here?
         if (result.empty()) {
             for (size_t i = 0; i < numCols; ++i) {
-                std::cout << jsonData[i].dump() << std::endl;
-                std::cout << jsonData[i][0].type_name() << std::endl;
                 switch (jsonData[i][0].type()) {
                     case nlohmann::detail::value_t::string:
-                        std::cout << "string" << std::endl;
                         result.push_back(std::make_unique<Column<std::string>>(jsonData[i].get<std::vector<std::string>>()));
                         break;
                     case nlohmann::detail::value_t::boolean:
-                        std::cout << "bool" << std::endl;
                         result.push_back(std::make_unique<Column<CustomBool>>(jsonData[i].get<std::vector<bool>>()));
                         break;
                     case nlohmann::detail::value_t::number_unsigned:
-                        std::cout << "int" << std::endl;
                         result.push_back(std::make_unique<Column<uint64_t>>(jsonData[i].get<std::vector<uint64_t>>()));
                         break;
                     case nlohmann::detail::value_t::number_integer:
-                        std::cout << "int" << std::endl;
                         result.push_back(std::make_unique<Column<int64_t>>(jsonData[i].get<std::vector<int64_t>>()));
                         break;
                     default:

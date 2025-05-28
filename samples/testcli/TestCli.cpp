@@ -27,7 +27,8 @@ void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
     }
 }
 int main() {
-    turingClient::TuringRequest request;
+    std::string url = "htpp://127.0.0.1/6666";
+    turingClient::TuringRequest request(url);
     std::string graph = "simpledb";
     // request.loadGraph(graph);
     std::vector<std::string> res;
