@@ -28,14 +28,17 @@ void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
 }
 int main() {
     turingClient::TuringRequest request;
-    std::vector<std::string> res;
-    // request.listAvailableGraphs(res);
-    // for(const auto& graph: res){
-    //     std::cout<<graph<<std::endl;
-
-    //}
-    std::string query = "match n-[e]-m return n,e.name,m.name";
     std::string graph = "simpledb";
+    // request.loadGraph(graph);
+    std::vector<std::string> res;
+    request.listLoadedGraphs(res);
+    for (const auto& graph : res) {
+        std::cout << graph << std::endl;
+    }
+
+
+
+    std::string query = "match n-[e]-m return n,e.name,m.name";
     std::vector<std::unique_ptr<TypedColumn>> result;
     request.query(query, graph, result);
 

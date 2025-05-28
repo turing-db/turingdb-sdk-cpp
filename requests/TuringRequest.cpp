@@ -14,9 +14,6 @@ using json = nlohmann::json;
 void TuringRequest::listAvailableGraphs(std::vector<std::string>& result) {
     RequestObject req = {HTTP_METHOD::POST, "http://127.0.0.1:6666", "/list_avail_graphs"};
     auto func = [&result](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        // std::cout.write(ptr, size * nmemb);
-        // std::cout << std::endl;
-
         json Doc {json::parse(ptr)};
 
         std::cout << Doc.dump() << std::endl;
@@ -36,7 +33,7 @@ void TuringRequest::listLoadedGraphs(std::vector<std::string>& result) {
         json Doc {json::parse(ptr)};
 
         std::cout << Doc.dump() << std::endl;
-        auto jsonVec = Doc[0]["data"].get<std::vector<std::string>>();
+        auto jsonVec = Doc[0]["data"][0][0].get<std::vector<std::string>>();
         result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
 
         return size * nmemb;
