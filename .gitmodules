@@ -1,3 +1,0 @@
-[submodule "turing-common"]
-	path = common
-	url = git@gitlab.turing.bio:turing/turing-common.git
