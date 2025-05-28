@@ -97,9 +97,10 @@ find_package(CURL REQUIRED)
 # Python
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
-add_subdirectory(common/include)
+add_subdirectory(base)
 add_subdirectory(samples)
 add_subdirectory(turingcurlclient)
 add_subdirectory(requests)
+add_subdirectory(common)
 
 enable_testing()

@@ -4,17 +4,9 @@
 
 using namespace turingClient;
 
-CurlRequest::CurlRequest()
-    : _handle(curl_easy_init())
-{
-}
 static size_t staticCallBack(char* ptr, size_t size, size_t nmemb, void* userdata) {
-    auto self = static_cast<CurlRequest*>(userdata);
+    auto* self = static_cast<CurlRequest*>(userdata);
     return self->callBackFn(ptr, size, nmemb, userdata);
-}
-
-CurlRequest::~CurlRequest() {
-    curl_easy_cleanup(_handle);
 }
 
 int CurlRequest::setUrl(std::string& url) {
@@ -24,10 +16,19 @@ int CurlRequest::setUrl(std::string& url) {
     return 0;
 }
 
-int CurlRequest::setPost() {
+int CurlRequest::setPost(std::string& postFields) {
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POST, 1L); res != CURLE_OK) {
         return 1;
     }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_POSTFIELDS, postFields.c_str()); res != CURLE_OK) {
+        return 1;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_POSTFIELDSIZE, postFields.size()); res != CURLE_OK) {
+        return 1;
+    }
+
     return 0;
 }
 

@@ -4,7 +4,9 @@ add_executable(TestCli
 target_include_directories(TestCli PRIVATE ${CURL_INCLUDE_DIRS})
 target_link_libraries(TestCli PRIVATE ${CURL_LIBRARIES})
 
-target_link_libraries(TestCli PRIVATE turing_request)
+target_link_libraries(TestCli PRIVATE 
+    typed_column
+    turing_request)
 
 
 install(

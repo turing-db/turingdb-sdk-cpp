@@ -2,16 +2,22 @@
 
 #include "CurlClient.h"
 #include "CallBackSignatures.h"
+#include "TypedColumn.h"
+#include <memory>
+
 
 namespace turingClient {
 
 class TuringRequest {
+
 public:
     TuringRequest() = default;
     ~TuringRequest() = default;
 
-    void listLoadedGraphs(WriteCallBack func);
-    void listAvailableGraphs(WriteCallBack func);
+    void listLoadedGraphs(std::vector<std::string>& result);
+    void listAvailableGraphs(std::vector<std::string>& result);
+    void loadGraph(std::string_view graph);
+    void query(std::string& query, std::string& graph, std::vector<std::unique_ptr<TypedColumn>>& result);
 
 private:
     CurlClient _client;

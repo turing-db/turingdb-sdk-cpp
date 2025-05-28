@@ -24,7 +24,7 @@ void CurlClient::sendRequest(RequestObject& req, WriteCallBack func) {
 
     switch (req.method) {
         case HTTP_METHOD::POST:
-            if (auto res = curlReq.setPost(); res) {
+            if (auto res = curlReq.setPost(req.body); res) {
                 std::cout << "Couldn't set post" << std::endl;
                 return;
             }

@@ -7,7 +7,6 @@
 
 namespace turingClient {
 
-
 class CurlClient {
 public:
     CurlClient();
