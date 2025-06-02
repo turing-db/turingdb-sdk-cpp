@@ -22,6 +22,7 @@ public:
 private:
     CurlClient _client;
     std::string& _url;
+    std::vector<char> _buffer;
 };
 
 }

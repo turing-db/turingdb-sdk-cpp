@@ -27,19 +27,19 @@ void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
     }
 }
 int main() {
-    std::string url = "htpp://127.0.0.1/6666";
+    std::string url = "http://127.0.0.1:6666";
     turingClient::TuringRequest request(url);
-    std::string graph = "simpledb";
+    std::string graph = "reactome";
     // request.loadGraph(graph);
-    std::vector<std::string> res;
-    request.listLoadedGraphs(res);
-    for (const auto& graph : res) {
-        std::cout << graph << std::endl;
-    }
+    //    std::vector<std::string> res;
+    //    request.listLoadedGraphs(res);
+    //    for (const auto& graph : res) {
+    //        std::cout << graph << std::endl;
+    //    }
 
 
 
-    std::string query = "match n-[e]-m return n,e.name,m.name";
+    std::string query = "match n return n";
     std::vector<std::unique_ptr<TypedColumn>> result;
     request.query(query, graph, result);
 

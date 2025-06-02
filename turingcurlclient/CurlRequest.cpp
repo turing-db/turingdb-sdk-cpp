@@ -21,6 +21,10 @@ int CurlRequest::setPost(std::string& postFields) {
         return 1;
     }
 
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_TCP_NODELAY, 1L); res != CURLE_OK) {
+        return 1;
+    }
+
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POSTFIELDS, postFields.c_str()); res != CURLE_OK) {
         return 1;
     }
@@ -28,6 +32,15 @@ int CurlRequest::setPost(std::string& postFields) {
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POSTFIELDSIZE, postFields.size()); res != CURLE_OK) {
         return 1;
     }
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1); res != CURLE_OK) {
+        return 1;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_BUFFERSIZE, CURL_MAX_READ_SIZE); res != CURLE_OK) {
+        std::cout << "could not set buffersize" << std::endl;
+        return 1;
+    }
+    std::cout << "could set buffersize" << std::endl;
 
     return 0;
 }
