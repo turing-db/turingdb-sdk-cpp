@@ -97,6 +97,14 @@ public:
     void* data() override { return _data.data(); }
     const void* data() const override { return _data.data(); }
 
+    ColType& operator[](size_t index) {
+        return _data[index];
+    }
+
+    const ColType& operator[](size_t index) const {
+        return _data[index];
+    }
+
     template <typename... Args>
     auto insert(Args&&... args) -> decltype(_data.insert(std::forward<Args>(args)...)) {
         return _data.insert(std::forward<Args>(args)...);

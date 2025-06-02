@@ -20,7 +20,6 @@ void TuringRequest::listAvailableGraphs(std::vector<std::string>& result) {
     auto func = [&result](char* ptr, size_t size, size_t nmemb, void* userdata) {
         json Doc {json::parse(ptr)};
 
-        std::cout << Doc.dump() << std::endl;
         auto jsonVec = Doc[0]["data"].get<std::vector<std::string>>();
         result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
 
@@ -36,7 +35,6 @@ void TuringRequest::listLoadedGraphs(std::vector<std::string>& result) {
     auto func = [&result](char* ptr, size_t size, size_t nmemb, void* userdata) {
         json Doc {json::parse(ptr)};
 
-        std::cout << Doc.dump() << std::endl;
         auto jsonVec = Doc[0]["data"][0][0].get<std::vector<std::string>>();
         result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
 
@@ -58,10 +56,8 @@ void TuringRequest::loadGraph(std::string_view graph) {
 void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result, size_t size) {
     json Doc {json::parse(location)};
 
-    std::cout << Doc.dump() << std::endl;
     auto jsonData = Doc[0]["data"][0];
     auto numCols = jsonData.size();
-    std::cout << numCols << std::endl;
     // TODO: check for errors here?
     if (result.empty()) {
         for (size_t i = 0; i < numCols; ++i) {
