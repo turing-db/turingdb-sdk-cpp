@@ -91,8 +91,8 @@ public:
         return get_column_type();
     }
 
-    std::vector<ColType>& get() { return _data; }
-    const std::vector<ColType>& get() const { return _data; }
+    std::vector<std::optional<ColType>>& get() { return _data; }
+    const std::vector<std::optional<ColType>>& get() const { return _data; }
     void push_back(const ColType& value) { _data.push_back(value); }
     void push_back(std::nullopt_t value) { _data.push_back(value); }
 
@@ -100,11 +100,11 @@ public:
     void* data() override { return _data.data(); }
     const void* data() const override { return _data.data(); }
 
-    ColType& operator[](size_t index) {
+    std::optional<ColType>& operator[](size_t index) {
         return _data[index];
     }
 
-    const ColType& operator[](size_t index) const {
+    const std::optional<ColType>& operator[](size_t index) const {
         return _data[index];
     }
 
