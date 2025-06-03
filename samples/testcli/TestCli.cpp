@@ -29,7 +29,7 @@ void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
 int main() {
     std::string url = "http://127.0.0.1:6666";
     turingClient::TuringRequest request(url);
-    std::string graph = "reactome";
+    std::string graph = "simpledb";
     // request.loadGraph(graph);
     //    std::vector<std::string> res;
     //    request.listLoadedGraphs(res);
@@ -39,7 +39,7 @@ int main() {
 
 
 
-    std::string query = "match n return n";
+    std::string query = "match n return n.isFrench";
     std::vector<std::unique_ptr<TypedColumn>> result;
     request.query(query, graph, result);
 

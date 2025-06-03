@@ -62,49 +62,70 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
     if (result.empty()) {
         for (size_t i = 0; i < numCols; ++i) {
             switch (jsonData[i][0].type()) {
-                case nlohmann::detail::value_t::string:
-                    result.push_back(std::make_unique<Column<std::string>>(jsonData[i].get<std::vector<std::string>>()));
+                case nlohmann::detail::value_t::string: {
+                    result.emplace_back(std::make_unique<Column<std::string>>());
+                }
+                case nlohmann::detail::value_t::boolean: {
+                    result.emplace_back(std::make_unique<Column<CustomBool>>());
                     break;
-                case nlohmann::detail::value_t::boolean:
-                    result.push_back(std::make_unique<Column<CustomBool>>(jsonData[i].get<std::vector<bool>>()));
+                }
+                case nlohmann::detail::value_t::number_unsigned: {
+                    result.emplace_back(std::make_unique<Column<uint64_t>>());
                     break;
-                case nlohmann::detail::value_t::number_unsigned:
-                    result.push_back(std::make_unique<Column<uint64_t>>(jsonData[i].get<std::vector<uint64_t>>()));
-                    break;
-                case nlohmann::detail::value_t::number_integer:
-                    result.push_back(std::make_unique<Column<int64_t>>(jsonData[i].get<std::vector<int64_t>>()));
-                    break;
+                }
+                case nlohmann::detail::value_t::number_integer: {
+                    result.emplace_back(std::make_unique<Column<int64_t>>());
+                }
                 default:
                     break;
             };
         }
-        return;
     }
 
     for (size_t i = 0; i < numCols; ++i) {
         switch (jsonData[i][0].type()) {
             case nlohmann::detail::value_t::string: {
                 auto* col = static_cast<Column<std::string>*>(result[i].get());
-                auto jsonCol = jsonData[i].get<std::vector<std::string>>();
-                col->insert(col->end(), jsonCol.begin(), jsonCol.end());
+                for (const auto& val : jsonData[i]) {
+                    if (!val.is_null()) {
+                        col->push_back(val.get<std::string>());
+                    } else {
+                        col->push_back(std::nullopt);
+                    }
+                }
                 break;
             }
             case nlohmann::detail::value_t::boolean: {
                 auto* col = static_cast<Column<CustomBool>*>(result[i].get());
-                auto jsonCol = jsonData[i].get<std::vector<bool>>();
-                col->insert(col->end(), jsonCol.begin(), jsonCol.end());
+                for (const auto& val : jsonData[i]) {
+                    if (!val.is_null()) {
+                        col->push_back(val.get<bool>());
+                    } else {
+                        col->push_back(std::nullopt);
+                    }
+                }
                 break;
             }
             case nlohmann::detail::value_t::number_unsigned: {
                 auto* col = static_cast<Column<uint64_t>*>(result[i].get());
-                auto jsonCol = jsonData[i].get<std::vector<uint64_t>>();
-                col->insert(col->end(), jsonCol.begin(), jsonCol.end());
+                for (const auto& val : jsonData[i]) {
+                    if (!val.is_null()) {
+                        col->push_back(val.get<uint64_t>());
+                    } else {
+                        col->push_back(std::nullopt);
+                    }
+                }
                 break;
             }
             case nlohmann::detail::value_t::number_integer: {
                 auto* col = static_cast<Column<int64_t>*>(result[i].get());
-                auto jsonCol = jsonData[i].get<std::vector<int64_t>>();
-                col->insert(col->end(), jsonCol.begin(), jsonCol.end());
+                for (const auto& val : jsonData[i]) {
+                    if (!val.is_null()) {
+                        col->push_back(val.get<int64_t>());
+                    } else {
+                        col->push_back(std::nullopt);
+                    }
+                }
                 break;
             }
             default:

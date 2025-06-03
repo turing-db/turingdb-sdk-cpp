@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -50,7 +51,7 @@ public:
 template <SupportedColumnType ColType>
 class Column : public TypedColumn {
 private:
-    std::vector<ColType> _data;
+    std::vector<std::optional<ColType>> _data;
 
     // Map C++ types to enum values
     static constexpr ColumnType get_column_type() {
@@ -70,6 +71,7 @@ private:
     }
 
 public:
+    Column() = default;
     // Maybe do an move constructor
     explicit Column(std::vector<ColType> col) {
         _data = col;
@@ -92,6 +94,7 @@ public:
     std::vector<ColType>& get() { return _data; }
     const std::vector<ColType>& get() const { return _data; }
     void push_back(const ColType& value) { _data.push_back(value); }
+    void push_back(std::nullopt_t value) { _data.push_back(value); }
 
     size_t size() const override { return _data.size(); }
     void* data() override { return _data.data(); }
@@ -120,9 +123,12 @@ public:
 
     void dump() {
         for (size_t i = 0; i < size(); i++) {
-            std::cout << _data[i] << std::endl;
+            if (_data[i].has_value()) {
+                std::cout << _data[i].value() << std::endl;
+            } else {
+                std::cout << "NaN" << std::endl;
+            }
         }
     }
 };
-
 }
