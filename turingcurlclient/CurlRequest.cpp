@@ -40,7 +40,6 @@ int CurlRequest::setPost(std::string& postFields) {
         std::cout << "could not set buffersize" << std::endl;
         return 1;
     }
-    std::cout << "could set buffersize" << std::endl;
 
     return 0;
 }

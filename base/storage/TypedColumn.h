@@ -4,6 +4,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace turingClient {
@@ -52,6 +53,7 @@ template <SupportedColumnType ColType>
 class Column : public TypedColumn {
 private:
     std::vector<std::optional<ColType>> _data;
+    std::string _colName;
 
     // Map C++ types to enum values
     static constexpr ColumnType get_column_type() {
@@ -72,6 +74,11 @@ private:
 
 public:
     Column() = default;
+
+    explicit Column(std::string colName)
+    :_colName(std::move(colName))
+    {
+    }
     // Maybe do an move constructor
     explicit Column(std::vector<ColType> col) {
         _data = col;
@@ -122,6 +129,7 @@ public:
     }
 
     void dump() {
+        std::cout << _colName << std::endl;
         for (size_t i = 0; i < size(); i++) {
             if (_data[i].has_value()) {
                 std::cout << _data[i].value() << std::endl;

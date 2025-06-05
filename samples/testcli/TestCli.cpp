@@ -26,6 +26,7 @@ void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
         }
     }
 }
+
 int main() {
     std::string url = "http://127.0.0.1:6666";
     turingClient::TuringRequest request(url);
@@ -39,7 +40,7 @@ int main() {
 
 
 
-    std::string query = "match n return n.isFrench";
+    std::string query = "match n-[e]-m return e.proficiency";
     std::vector<std::unique_ptr<TypedColumn>> result;
     request.query(query, graph, result);
 

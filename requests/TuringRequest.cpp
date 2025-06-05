@@ -57,34 +57,30 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
     json Doc {json::parse(location)};
 
     auto jsonData = Doc[0]["data"][0];
-    auto numCols = jsonData.size();
+    auto colNames = Doc[0]["header"]["column_names"].get<std::vector<std::string>>();
+    auto colTypes = Doc[0]["header"]["column_types"].get<std::vector<std::string>>();
+    auto numCols = colNames.size();
+
     // TODO: check for errors here?
     if (result.empty()) {
         for (size_t i = 0; i < numCols; ++i) {
-            switch (jsonData[i][0].type()) {
-                case nlohmann::detail::value_t::string: {
-                    result.emplace_back(std::make_unique<Column<std::string>>());
-                }
-                case nlohmann::detail::value_t::boolean: {
-                    result.emplace_back(std::make_unique<Column<CustomBool>>());
-                    break;
-                }
-                case nlohmann::detail::value_t::number_unsigned: {
-                    result.emplace_back(std::make_unique<Column<uint64_t>>());
-                    break;
-                }
-                case nlohmann::detail::value_t::number_integer: {
-                    result.emplace_back(std::make_unique<Column<int64_t>>());
-                }
-                default:
-                    break;
-            };
+            if (colTypes[i] == "String") {
+                result.emplace_back(std::make_unique<Column<std::string>>(colNames[i]));
+            } else if (colTypes[i] == "Bool") {
+                result.emplace_back(std::make_unique<Column<CustomBool>>(colNames[i]));
+            } else if (colTypes[i] == "UInt64") {
+                result.emplace_back(std::make_unique<Column<uint64_t>>(colNames[i]));
+            } else if (colTypes[i] == "Int64") {
+                result.emplace_back(std::make_unique<Column<int64_t>>(colNames[i]));
+            } else {
+                // error unkown type
+            }
         }
     }
 
     for (size_t i = 0; i < numCols; ++i) {
-        switch (jsonData[i][0].type()) {
-            case nlohmann::detail::value_t::string: {
+        switch (result[i].get()->column_type()) {
+            case ColumnType::STRING: {
                 auto* col = static_cast<Column<std::string>*>(result[i].get());
                 for (const auto& val : jsonData[i]) {
                     if (!val.is_null()) {
@@ -95,7 +91,7 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
                 }
                 break;
             }
-            case nlohmann::detail::value_t::boolean: {
+            case ColumnType::BOOL: {
                 auto* col = static_cast<Column<CustomBool>*>(result[i].get());
                 for (const auto& val : jsonData[i]) {
                     if (!val.is_null()) {
@@ -106,7 +102,7 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
                 }
                 break;
             }
-            case nlohmann::detail::value_t::number_unsigned: {
+            case ColumnType::UINT: {
                 auto* col = static_cast<Column<uint64_t>*>(result[i].get());
                 for (const auto& val : jsonData[i]) {
                     if (!val.is_null()) {
@@ -117,7 +113,7 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
                 }
                 break;
             }
-            case nlohmann::detail::value_t::number_integer: {
+            case ColumnType::INT: {
                 auto* col = static_cast<Column<int64_t>*>(result[i].get());
                 for (const auto& val : jsonData[i]) {
                     if (!val.is_null()) {
