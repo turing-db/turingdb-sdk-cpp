@@ -98,7 +98,7 @@ public:
         return getColumnType();
     }
 
-    std::string_view getColumnName() {
+    std::string& getColumnName() {
         return _colName;
     }
 
