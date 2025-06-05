@@ -79,7 +79,7 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
     }
 
     for (size_t i = 0; i < numCols; ++i) {
-        switch (result[i].get()->column_type()) {
+        switch (result[i].get()->columnType()) {
             case ColumnType::STRING: {
                 auto* col = static_cast<Column<std::string>*>(result[i].get());
                 for (const auto& val : jsonData[i]) {

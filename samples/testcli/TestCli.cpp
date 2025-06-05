@@ -8,7 +8,7 @@ using namespace turingClient;
 
 void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
     for (size_t i = 0; i < cols.size(); ++i) {
-        switch (cols[i]->column_type()) {
+        switch (cols[i]->columnType()) {
             case INT:
                 static_cast<Column<int64_t>*>(cols[i].get())->dump();
                 break;

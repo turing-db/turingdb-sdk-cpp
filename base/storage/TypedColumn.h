@@ -46,7 +46,7 @@ public:
     virtual void* data() = 0;
     virtual const void* data() const = 0;
 
-    virtual ColumnType column_type() const = 0;
+    virtual ColumnType columnType() const = 0;
 };
 
 template <SupportedColumnType ColType>
@@ -56,7 +56,7 @@ private:
     std::string _colName;
 
     // Map C++ types to enum values
-    static constexpr ColumnType get_column_type() {
+    static constexpr ColumnType getColumnType() {
         if constexpr (std::is_same_v<ColType, int64_t>) {
             return ColumnType::INT;
         } else if constexpr (std::is_same_v<ColType, uint64_t>) {
@@ -94,8 +94,12 @@ public:
     }
 
 
-    ColumnType column_type() const override {
-        return get_column_type();
+    ColumnType columnType() const override {
+        return getColumnType();
+    }
+
+    std::string_view getColumnName() {
+        return _colName;
     }
 
     std::vector<std::optional<ColType>>& get() { return _data; }
