@@ -56,7 +56,7 @@ void TuringRequest::loadGraph(std::string_view graph) {
 void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result, size_t size) {
     json Doc {json::parse(location)};
 
-    auto jsonData = Doc[0]["data"][0];
+    auto jsonHeader = Doc[0]["header"];
     auto colNames = Doc[0]["header"]["column_names"].get<std::vector<std::string>>();
     auto colTypes = Doc[0]["header"]["column_types"].get<std::vector<std::string>>();
     auto numCols = colNames.size();
@@ -78,55 +78,57 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
         }
     }
 
-    for (size_t i = 0; i < numCols; ++i) {
-        switch (result[i].get()->columnType()) {
-            case ColumnType::STRING: {
-                auto* col = static_cast<Column<std::string>*>(result[i].get());
-                for (const auto& val : jsonData[i]) {
-                    if (!val.is_null()) {
-                        col->push_back(val.get<std::string>());
-                    } else {
-                        col->push_back(std::nullopt);
+    for (const auto& jsonData : Doc[0]["data"]) {
+        for (size_t i = 0; i < numCols; ++i) {
+            switch (result[i].get()->columnType()) {
+                case ColumnType::STRING: {
+                    auto* col = static_cast<Column<std::string>*>(result[i].get());
+                    for (const auto& val : jsonData[i]) {
+                        if (!val.is_null()) {
+                            col->push_back(val.get<std::string>());
+                        } else {
+                            col->push_back(std::nullopt);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case ColumnType::BOOL: {
-                auto* col = static_cast<Column<CustomBool>*>(result[i].get());
-                for (const auto& val : jsonData[i]) {
-                    if (!val.is_null()) {
-                        col->push_back(val.get<bool>());
-                    } else {
-                        col->push_back(std::nullopt);
+                case ColumnType::BOOL: {
+                    auto* col = static_cast<Column<CustomBool>*>(result[i].get());
+                    for (const auto& val : jsonData[i]) {
+                        if (!val.is_null()) {
+                            col->push_back(val.get<bool>());
+                        } else {
+                            col->push_back(std::nullopt);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case ColumnType::UINT: {
-                auto* col = static_cast<Column<uint64_t>*>(result[i].get());
-                for (const auto& val : jsonData[i]) {
-                    if (!val.is_null()) {
-                        col->push_back(val.get<uint64_t>());
-                    } else {
-                        col->push_back(std::nullopt);
+                case ColumnType::UINT: {
+                    auto* col = static_cast<Column<uint64_t>*>(result[i].get());
+                    for (const auto& val : jsonData[i]) {
+                        if (!val.is_null()) {
+                            col->push_back(val.get<uint64_t>());
+                        } else {
+                            col->push_back(std::nullopt);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case ColumnType::INT: {
-                auto* col = static_cast<Column<int64_t>*>(result[i].get());
-                for (const auto& val : jsonData[i]) {
-                    if (!val.is_null()) {
-                        col->push_back(val.get<int64_t>());
-                    } else {
-                        col->push_back(std::nullopt);
+                case ColumnType::INT: {
+                    auto* col = static_cast<Column<int64_t>*>(result[i].get());
+                    for (const auto& val : jsonData[i]) {
+                        if (!val.is_null()) {
+                            col->push_back(val.get<int64_t>());
+                        } else {
+                            col->push_back(std::nullopt);
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            default:
-                break;
-        };
+                default:
+                    break;
+            };
+        }
     }
 }
 
@@ -142,7 +144,7 @@ void TuringRequest::query(std::string& query, std::string& graph, std::vector<st
 
         return size * nmemb;
     };
+
     _client.sendRequest(req, func);
     _buffer.push_back('\0');
-    parseJson(_buffer.data(), result, _buffer.size());
 }
