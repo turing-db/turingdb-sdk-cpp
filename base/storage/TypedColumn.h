@@ -52,7 +52,8 @@ public:
 template <SupportedColumnType ColType>
 class Column : public TypedColumn {
 private:
-    std::vector<std::optional<ColType>> _data;
+    std::vector<ColType> _data;
+    std::vector<int8_t> _mask;
     std::string _colName;
 
     // Map C++ types to enum values
@@ -102,20 +103,37 @@ public:
         return _colName;
     }
 
-    std::vector<std::optional<ColType>>& get() { return _data; }
-    const std::vector<std::optional<ColType>>& get() const { return _data; }
+    std::vector<ColType>& get() { return _data; }
+    const std::vector<ColType>& get() const { return _data; }
     void push_back(const ColType& value) { _data.push_back(value); }
-    void push_back(std::nullopt_t value) { _data.push_back(value); }
+    // void push_back(std::nullopt_t value) { _data.push_back(value); }
+
+    // MaskOps
+    std::vector<int8_t>& getMask() { return _mask; }
+    const std::vector<int8_t>& getMask() const { return _mask; }
+    void push_back_mask(const int8_t value) { _mask.push_back(value); }
+
+    void push_data_and_mask(const ColType& data, const int8_t mask) {
+        _data.push_back(data);
+        _mask.push_back(mask);
+    }
 
     size_t size() const override { return _data.size(); }
     void* data() override { return _data.data(); }
     const void* data() const override { return _data.data(); }
 
-    std::optional<ColType>& operator[](size_t index) {
+    bool isValid(size_t index) {
+        if (_mask[index]) {
+            return false;
+        }
+        return true;
+    }
+
+    ColType& operator[](size_t index) {
         return _data[index];
     }
 
-    const std::optional<ColType>& operator[](size_t index) const {
+    const ColType& operator[](size_t index) const {
         return _data[index];
     }
 
@@ -135,8 +153,8 @@ public:
     void dump() {
         std::cout << _colName << std::endl;
         for (size_t i = 0; i < size(); i++) {
-            if (_data[i].has_value()) {
-                std::cout << _data[i].value() << std::endl;
+            if (_mask[i]) {
+                std::cout << _data[i] << std::endl;
             } else {
                 std::cout << "NaN" << std::endl;
             }

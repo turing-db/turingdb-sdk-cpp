@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 
+#include "Profiler.h"
+
 using namespace turingClient;
 
 CurlClient::CurlClient()
@@ -11,6 +13,7 @@ CurlClient::CurlClient()
 }
 
 void CurlClient::init() {
+    Profile profile {"CurlClient::init"};
     curl_global_init(CURL_GLOBAL_ALL);
 }
 
@@ -20,6 +23,7 @@ CurlClient::~CurlClient() {
 }
 
 void CurlClient::sendRequest(RequestObject& req, WriteCallBack func) {
+    Profile profile {"CurlClient::sendRequest"};
     CurlRequest& curlReq = _handles.emplace_back();
 
     switch (req.method) {

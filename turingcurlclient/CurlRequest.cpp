@@ -1,4 +1,5 @@
 #include "CurlRequest.h"
+#include "Profiler.h"
 #include <curl/curl.h>
 #include <iostream>
 
@@ -10,6 +11,7 @@ static size_t staticCallBack(char* ptr, size_t size, size_t nmemb, void* userdat
 }
 
 int CurlRequest::setUrl(std::string& url) {
+    Profile profile {"CurlRequest::setUrl"};
     if (auto res = curl_easy_setopt(_handle, CURLOPT_URL, url.c_str()); res != CURLE_OK) {
         return 1;
     }
@@ -17,6 +19,7 @@ int CurlRequest::setUrl(std::string& url) {
 }
 
 int CurlRequest::setPost(std::string& postFields) {
+    Profile profile {"CurlRequest::setPost"};
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POST, 1L); res != CURLE_OK) {
         return 1;
     }
@@ -45,6 +48,7 @@ int CurlRequest::setPost(std::string& postFields) {
 }
 
 int CurlRequest::setWriteCallBack(WriteCallBack func) {
+    Profile profile {"CurlRequest::setWriteCallBack"};
     callBackFn = std::move(func);
     if (auto res = curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, staticCallBack); res != CURLE_OK) {
         return 1;
@@ -56,6 +60,7 @@ int CurlRequest::setWriteCallBack(WriteCallBack func) {
     return 0;
 }
 int CurlRequest::send() {
+    Profile profile {"CurlRequest::send"};
     if (auto res = curl_easy_perform(_handle); res != CURLE_OK) {
         std::cerr << "Failed to perform: " << curl_easy_strerror(res) << std::endl;
         return 1;

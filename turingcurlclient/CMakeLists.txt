@@ -9,5 +9,8 @@ target_include_directories(turing_curl_client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 target_include_directories(turing_curl_client PRIVATE ${CURL_INCLUDE_DIRS})
 target_link_libraries(turing_curl_client PRIVATE ${CURL_LIBRARIES})
 
-target_link_libraries(turing_curl_client PRIVATE common_headers)
+target_link_libraries(turing_curl_client PRIVATE 
+
+    turing_common_s
+    common_headers)
 

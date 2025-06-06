@@ -1,7 +1,8 @@
 #include "TuringRequest.h"
 
-#include "RequestObject.h"
 #include "CurlClient.h"
+#include "Profiler.h"
+#include "RequestObject.h"
 
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -53,12 +54,19 @@ void TuringRequest::loadGraph(std::string_view graph) {
     _client.sendRequest(req, func);
 }
 
-void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result, size_t size) {
+void parseJson(char* location,
+               std::vector<std::unique_ptr<TypedColumn>>& result, size_t size) {
+    Profile profile {"TuringRequest::parseJson"};
+
+    Profile* jsonParseProfile = new Profile("json Parsing");
     json Doc {json::parse(location)};
+    delete jsonParseProfile;
 
     auto jsonHeader = Doc[0]["header"];
-    auto colNames = Doc[0]["header"]["column_names"].get<std::vector<std::string>>();
-    auto colTypes = Doc[0]["header"]["column_types"].get<std::vector<std::string>>();
+    auto colNames =
+        Doc[0]["header"]["column_names"].get<std::vector<std::string>>();
+    auto colTypes =
+        Doc[0]["header"]["column_types"].get<std::vector<std::string>>();
     auto numCols = colNames.size();
 
     // TODO: check for errors here?
@@ -85,9 +93,9 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
                     auto* col = static_cast<Column<std::string>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_back(val.get<std::string>());
+                            col->push_data_and_mask(val.get<std::string>(), 0);
                         } else {
-                            col->push_back(std::nullopt);
+                            col->push_data_and_mask(std::string(), 1);
                         }
                     }
                     break;
@@ -96,9 +104,9 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
                     auto* col = static_cast<Column<CustomBool>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_back(val.get<bool>());
+                            col->push_data_and_mask(val.get<bool>(), 0);
                         } else {
-                            col->push_back(std::nullopt);
+                            col->push_data_and_mask(bool(), 1);
                         }
                     }
                     break;
@@ -107,9 +115,9 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
                     auto* col = static_cast<Column<uint64_t>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_back(val.get<uint64_t>());
+                            col->push_data_and_mask(val.get<uint64_t>(), 0);
                         } else {
-                            col->push_back(std::nullopt);
+                            col->push_data_and_mask(uint64_t(), 1);
                         }
                     }
                     break;
@@ -118,9 +126,9 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
                     auto* col = static_cast<Column<int64_t>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_back(val.get<int64_t>());
+                            col->push_data_and_mask(val.get<int64_t>(), 0);
                         } else {
-                            col->push_back(std::nullopt);
+                            col->push_data_and_mask(int64_t(), 1);
                         }
                     }
                     break;
@@ -132,7 +140,9 @@ void parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result
     }
 }
 
-void TuringRequest::query(std::string& query, std::string& graph, std::vector<std::unique_ptr<TypedColumn>>& result) {
+void TuringRequest::query(std::string& query, std::string& graph,
+                          std::vector<std::unique_ptr<TypedColumn>>& result) {
+    Profile profile {"TuringRequest::query"};
     _buffer.clear();
     auto queryURI = "/query?graph=" + graph;
     RequestObject req = {HTTP_METHOD::POST, _url, queryURI, query};
@@ -147,4 +157,5 @@ void TuringRequest::query(std::string& query, std::string& graph, std::vector<st
 
     _client.sendRequest(req, func);
     _buffer.push_back('\0');
+    parseJson(_buffer.data(), result, _buffer.size());
 }
