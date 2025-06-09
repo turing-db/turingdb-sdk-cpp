@@ -5,7 +5,7 @@
 #include <string>
 
 #include "CallBackSignatures.h"
-
+#include "CurlClientResult.h"
 
 namespace turingClient {
 
@@ -14,7 +14,8 @@ public:
     WriteCallBack callBackFn;
 
     CurlRequest()
-        : _handle(curl_easy_init()) {
+        : _handle(curl_easy_init())
+    {
         if (!_handle) {
             throw std::runtime_error("Failed to initialize CURL");
         }
@@ -45,10 +46,10 @@ public:
         return *this;
     };
 
-    int setUrl(std::string& url);
-    int setPost(std::string& postFields);
-    int setWriteCallBack(WriteCallBack func);
-    int send();
+    CurlClientResult<void> setUrl(const std::string& url);
+    CurlClientResult<void> setPost(const std::string& postFields);
+    CurlClientResult<void> setWriteCallBack(WriteCallBack& func);
+    CurlClientResult<void> send();
 
 private:
     CURL* _handle;

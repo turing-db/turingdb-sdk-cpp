@@ -22,34 +22,32 @@ CurlClient::~CurlClient() {
     curl_global_cleanup();
 }
 
-void CurlClient::sendRequest(RequestObject& req, WriteCallBack func) {
+CurlClientResult<void> CurlClient::sendRequest(const RequestObject& req, WriteCallBack func) {
     Profile profile {"CurlClient::sendRequest"};
     CurlRequest& curlReq = _handles.emplace_back();
 
     switch (req.method) {
         case HTTP_METHOD::POST:
             if (auto res = curlReq.setPost(req.body); res) {
-                std::cout << "Couldn't set post" << std::endl;
-                return;
+                return res;
             }
             break;
         default:
-            std::cout << "Couldn't recognise anything" << std::endl;
-            return;
+            return CurlClientError::result(CurlClientErrorType::UNKNOWN_HTTP_METHOD);
     }
 
     auto fullUrl = std::string(req.url) + std::string(req.endpoint);
     if (auto res = curlReq.setUrl(fullUrl); res) {
-        std::cout << "couldn't set url" << std::endl;
-        return;
+        return res;
     }
 
     if (auto res = curlReq.setWriteCallBack(func); res) {
-        std::cout << "couldn't set callback" << std::endl;
-        return;
+        return res;
     }
 
     if (auto res = curlReq.send(); res) {
-        return;
+        return res;
     }
+
+    return {};
 }
