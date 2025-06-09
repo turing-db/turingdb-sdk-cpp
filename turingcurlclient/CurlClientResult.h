@@ -19,7 +19,7 @@ enum class CurlClientErrorType : uint8_t {
     _SIZE,
 };
 
-using ErrorTypeDescription = EnumToString<CurlClientErrorType>::Create<
+using CurlClientErrorTypeDescription = EnumToString<CurlClientErrorType>::Create<
     EnumStringPair<CurlClientErrorType::UNKNOWN, "Unknown">,
     EnumStringPair<CurlClientErrorType::CANNOT_SET_POST_REQUEST, "Could not set the curl request to POST">,
     EnumStringPair<CurlClientErrorType::CANNOT_SET_URL_REQUEST, "Could not set the destination URL on the request">,

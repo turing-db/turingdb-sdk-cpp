@@ -1,10 +1,9 @@
-#include "CurlClientResult.h"
+#include "TuringRequestResult.h"
 #include <curl/curl.h>
 
 using namespace turingClient;
 
-std::string CurlClientError::fmtMessage() const {
-
+std::string TuringRequestError::fmtMessage() const {
     return fmt::format("Turing Request Error: {}",
-                       ErrorTypeDescription::value(_type));
+                       TuringRequestErrorTypeDescription::value(_type));
 }
