@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <iostream>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -105,17 +104,21 @@ public:
 
     std::vector<ColType>& get() { return _data; }
     const std::vector<ColType>& get() const { return _data; }
-    void push_back(const ColType& value) { _data.push_back(value); }
-    // void push_back(std::nullopt_t value) { _data.push_back(value); }
 
     // MaskOps
     std::vector<int8_t>& getMask() { return _mask; }
     const std::vector<int8_t>& getMask() const { return _mask; }
-    void push_back_mask(const int8_t value) { _mask.push_back(value); }
 
-    void push_data_and_mask(const ColType& data, const int8_t mask) {
+    void pushDataAndMask(const ColType& data, const int8_t mask) {
         _data.push_back(data);
         _mask.push_back(mask);
+    }
+
+    void push_back(const ColType& data) {
+        pushDataAndMask(data, 0);
+    }
+    void pushNull() {
+        pushDataAndMask(ColType{}, 1);
     }
 
     size_t size() const override { return _data.size(); }

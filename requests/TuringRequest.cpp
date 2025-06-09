@@ -93,9 +93,9 @@ void parseJson(char* location,
                     auto* col = static_cast<Column<std::string>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_data_and_mask(val.get<std::string>(), 0);
+                            col->push_back(val.get<std::string>());
                         } else {
-                            col->push_data_and_mask(std::string(), 1);
+                            col->pushNull();
                         }
                     }
                     break;
@@ -104,9 +104,9 @@ void parseJson(char* location,
                     auto* col = static_cast<Column<CustomBool>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_data_and_mask(val.get<bool>(), 0);
+                            col->push_back(val.get<bool>());
                         } else {
-                            col->push_data_and_mask(bool(), 1);
+                            col->pushNull();
                         }
                     }
                     break;
@@ -115,9 +115,9 @@ void parseJson(char* location,
                     auto* col = static_cast<Column<uint64_t>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_data_and_mask(val.get<uint64_t>(), 0);
+                            col->push_back(val.get<uint64_t>());
                         } else {
-                            col->push_data_and_mask(uint64_t(), 1);
+                            col->pushNull();
                         }
                     }
                     break;
@@ -126,9 +126,9 @@ void parseJson(char* location,
                     auto* col = static_cast<Column<int64_t>*>(result[i].get());
                     for (const auto& val : jsonData[i]) {
                         if (!val.is_null()) {
-                            col->push_data_and_mask(val.get<int64_t>(), 0);
+                            col->push_back(val.get<int64_t>());
                         } else {
-                            col->push_data_and_mask(int64_t(), 1);
+                            col->pushNull();
                         }
                     }
                     break;
