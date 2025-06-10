@@ -1,15 +1,15 @@
-add_executable(TestCli
-               TestCli.cpp)
+add_executable(TestClient
+               TestClient.cpp)
 
-target_include_directories(TestCli PRIVATE ${CURL_INCLUDE_DIRS})
-target_link_libraries(TestCli PRIVATE ${CURL_LIBRARIES})
+target_include_directories(TestClient PRIVATE ${CURL_INCLUDE_DIRS})
+target_link_libraries(TestClient PRIVATE ${CURL_LIBRARIES})
 
-target_link_libraries(TestCli PRIVATE 
+target_link_libraries(TestClient PRIVATE 
     typed_column
     turing_request)
 
 
 install(
-    TARGETS     TestCli 
+    TARGETS     TestClient 
     DESTINATION executable/)
 
