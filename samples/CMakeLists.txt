@@ -1,1 +1,1 @@
-add_subdirectory(testcli)
+add_subdirectory(testclient)
