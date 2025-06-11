@@ -1,8 +1,6 @@
 #include "gtest/gtest.h"
-
 #include "TypedColumn.h"
 #include "JsonUtils.h"
-#include "spdlog/spdlog.h"
 
 using namespace turingClient;
 
@@ -44,7 +42,6 @@ TEST_F(TuringRequestTest, jsonValidParseTests) {
 
     std::vector<std::unique_ptr<TypedColumn>> cols;
     auto res = parseJson(jsonResult.data(), cols);
-    spdlog::info(res.error().fmtMessage());
     ASSERT_TRUE(res);
 
     ASSERT_EQ(cols.size(), 4);
