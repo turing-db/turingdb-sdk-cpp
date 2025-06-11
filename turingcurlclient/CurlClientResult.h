@@ -15,6 +15,7 @@ enum class CurlClientErrorType : uint8_t {
     CANNOT_SET_URL_REQUEST,
     CANNOT_SET_WRITE_CALLBACK,
     CANNOT_SEND_REQUEST,
+    HTTP_ERROR,
     UNKNOWN_HTTP_METHOD,
     _SIZE,
 };
@@ -25,6 +26,7 @@ using CurlClientErrorTypeDescription = EnumToString<CurlClientErrorType>::Create
     EnumStringPair<CurlClientErrorType::CANNOT_SET_URL_REQUEST, "Could not set the destination URL on the request">,
     EnumStringPair<CurlClientErrorType::CANNOT_SET_WRITE_CALLBACK, "Could not set the write callback function">,
     EnumStringPair<CurlClientErrorType::CANNOT_SEND_REQUEST, "Could not send the CURL request">,
+    EnumStringPair<CurlClientErrorType::HTTP_ERROR, "Received HTTP Error Code">,
     EnumStringPair<CurlClientErrorType::UNKNOWN_HTTP_METHOD, "HTTP Method Unsuported By Turing Curl Client">>;
 
 class CurlClientError {
@@ -32,8 +34,11 @@ public:
     CurlClientError() = default;
     CurlClientError(CurlClientErrorType type, const int libCurlError)
         : _type(type),
-        _libCurlError(libCurlError)
-    {
+          _libCurlError(libCurlError) {
+    }
+    CurlClientError(CurlClientErrorType type, const long httpErrorCode)
+        : _type(type),
+          _httpErrorCode(httpErrorCode) {
     }
 
     [[nodiscard]] CurlClientErrorType getType() const { return _type; }
@@ -48,9 +53,9 @@ public:
 private:
     CurlClientErrorType _type {};
     int _libCurlError {0};
+    long _httpErrorCode {0};
 };
 
 template <typename T>
 using CurlClientResult = BasicResult<T, class CurlClientError>;
-
 }

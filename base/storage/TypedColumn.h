@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -21,7 +22,11 @@ struct CustomBool {
     }
     operator bool() const { return _boolean; }
 
-    bool _boolean;
+    bool operator==(const CustomBool& other) const {
+        return _boolean == other._boolean;
+    }
+
+    bool _boolean {false};
 };
 
 enum ColumnType : uint8_t {
@@ -79,18 +84,82 @@ public:
     :_colName(std::move(colName))
     {
     }
-    // Maybe do an move constructor
-    explicit Column(std::vector<ColType> col) {
-        _data = col;
+
+    explicit Column(std::vector<std::optional<ColType>> col)
+        requires(!std::same_as<ColType, CustomBool>)
+    {
+        _data.reserve(col.size());
+        _mask.reserve(col.size());
+
+        for (const auto& val : col) {
+            if (val.has_value()) {
+                _data.push_back(val.value());
+                _mask.push_back(0);
+            } else {
+                _data.push_back(ColType {});
+                _mask.push_back(1);
+            }
+        }
     }
 
-    explicit Column(const std::vector<bool>& col)
+    Column(std::initializer_list<std::optional<ColType>> col)
+        requires(!std::same_as<ColType, CustomBool>)
+    {
+        _data.reserve(col.size());
+        _mask.reserve(col.size());
+
+        for (const auto& val : col) {
+            if (val.has_value()) {
+                _data.push_back(val.value());
+                _mask.push_back(0);
+            } else {
+                _data.push_back(ColType {});
+                _mask.push_back(1);
+            }
+        }
+    }
+
+    explicit Column(std::vector<std::optional<bool>>& col)
         requires std::same_as<ColType, CustomBool>
     {
         _data.reserve(col.size());
-        for (bool b : col) {
-            _data.emplace_back(b);
+
+        for (const auto& val : col) {
+            if (val.has_value()) {
+                _data.push_back(CustomBool(val.value()));
+                _mask.push_back(0);
+            } else {
+                _data.push_back(ColType {});
+                _mask.push_back(1);
+            }
         }
+    }
+
+    Column(std::initializer_list<std::optional<bool>> col)
+        requires std::same_as<ColType, CustomBool>
+    {
+        _data.reserve(col.size());
+
+        for (const auto& val : col) {
+            if (val.has_value()) {
+                _data.push_back(CustomBool(val.value()));
+                _mask.push_back(0);
+            } else {
+                _data.push_back(ColType {});
+                _mask.push_back(1);
+            }
+        }
+    }
+
+    std::strong_ordering operator<=>(const Column& other) const {
+        if (auto cmp = _data <=> other._data(); cmp != std::strong_ordering::equal) {
+            return cmp;
+        }
+        return _mask <=> other._mask;
+    }
+
+    bool operator==(const Column& other) const {
+        return _data == other._data && _mask == other._mask;
     }
 
 
@@ -140,23 +209,10 @@ public:
         return _data[index];
     }
 
-    template <typename... Args>
-    auto insert(Args&&... args) -> decltype(_data.insert(std::forward<Args>(args)...)) {
-        return _data.insert(std::forward<Args>(args)...);
-    }
-
-    auto begin() -> decltype(_data.begin()) {
-        return _data.begin();
-    }
-
-    auto end() -> decltype(_data.end()) {
-        return _data.end();
-    }
-
     void dump() {
         std::cout << _colName << std::endl;
         for (size_t i = 0; i < size(); i++) {
-            if (_mask[i]) {
+            if (!_mask[i]) {
                 std::cout << _data[i] << std::endl;
             } else {
                 std::cout << "NaN" << std::endl;

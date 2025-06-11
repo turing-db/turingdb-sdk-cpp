@@ -1,8 +1,9 @@
 #include "TuringRequest.h"
 
-#include "CurlClient.h"
 #include "Profiler.h"
 #include "RequestObject.h"
+#include "JsonUtils.h"
+#include "CurlClient.h"
 
 #include <nlohmann/json.hpp>
 
@@ -16,22 +17,29 @@ TuringRequest::TuringRequest(std::string& url)
 {
 }
 
-TuringRequestResult<void> checkJsonError(const json& jsonMsg, const TuringRequestErrorType retErrType) {
-    if (auto queryErrorMsg = jsonMsg[0]["error"]; !queryErrorMsg) {
-        return TuringRequestError::result(retErrType, queryErrorMsg.get<std::string>());
-    }
-
-    return {};
-}
-
 TuringRequestResult<void> TuringRequest::listAvailableGraphs(std::vector<std::string>& result) {
     RequestObject req = {HTTP_METHOD::POST, _url, "/list_avail_graphs"};
 
     TuringRequestResult<void> ret;
 
     auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        json res {json::parse(ptr)};
+        if (!ptr || strlen(ptr) == 0) {
+            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            return size * nmemb;
+        }
+
+        json res {json::parse(ptr, ptr + size * nmemb, nullptr, false)};
+        if (res.is_discarded()) {
+            ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
+            return size * nmemb;
+        }
+
         if (ret = checkJsonError(res, TuringRequestErrorType::CANNOT_LIST_AVAILABLE_GRAPHS); !ret) {
+            return size * nmemb;
+        }
+
+        if (!res[0].contains("data")) {
+            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
 
@@ -54,11 +62,25 @@ TuringRequestResult<void> TuringRequest::listLoadedGraphs(std::vector<std::strin
     TuringRequestResult<void> ret;
 
     auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        json res {json::parse(ptr)};
+        if (!ptr || strlen(ptr) == 0) {
+            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            return size * nmemb;
+        }
+
+        json res {json::parse(ptr, ptr + size * nmemb, nullptr, false)};
+        if (res.is_discarded()) {
+            ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
+            return size * nmemb;
+        }
+
         if (ret = checkJsonError(res, TuringRequestErrorType::CANNOT_LIST_LOADED_GRAPHS); !ret) {
             return size * nmemb;
         }
 
+        if (!res[0].contains("data")) {
+            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            return size * nmemb;
+        }
         auto jsonVec = res[0]["data"][0][0].get<std::vector<std::string>>();
         result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
 
@@ -79,7 +101,17 @@ TuringRequestResult<void> TuringRequest::loadGraph(std::string_view graph) {
     TuringRequestResult<void> ret;
 
     auto func = [&ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        const json res {json::parse(ptr)};
+        if (!ptr || strlen(ptr) == 0) {
+            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            return size * nmemb;
+        }
+
+        json res {json::parse(ptr, ptr + size * nmemb, nullptr, false)};
+        if (res.is_discarded()) {
+            ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
+            return size * nmemb;
+        }
+
         ret = checkJsonError(res, TuringRequestErrorType::CANNOT_LOAD_GRAPH);
 
         return size * nmemb;
@@ -90,94 +122,6 @@ TuringRequestResult<void> TuringRequest::loadGraph(std::string_view graph) {
     }
 
     return ret;
-}
-
-TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result, size_t size) {
-    Profile profile {"TuringRequest::parseJson"};
-
-    Profile* jsonParseProfile = new Profile("json Parsing");
-    const json res {json::parse(location)};
-    delete jsonParseProfile;
-
-    if (auto ret = checkJsonError(res, turingClient::TuringRequestErrorType::TURING_QUERY_FAILED); !ret) {
-        return ret;
-    }
-
-    const auto jsonHeader = res[0]["header"];
-    const auto colNames = res[0]["header"]["column_names"].get<std::vector<std::string>>();
-    const auto colTypes = res[0]["header"]["column_types"].get<std::vector<std::string>>();
-    const auto numCols = colNames.size();
-
-    if (result.empty()) {
-        for (size_t i = 0; i < numCols; ++i) {
-            if (colTypes[i] == "String") {
-                result.emplace_back(std::make_unique<Column<std::string>>(colNames[i]));
-            } else if (colTypes[i] == "Bool") {
-                result.emplace_back(std::make_unique<Column<CustomBool>>(colNames[i]));
-            } else if (colTypes[i] == "UInt64") {
-                result.emplace_back(std::make_unique<Column<uint64_t>>(colNames[i]));
-            } else if (colTypes[i] == "Int64") {
-                result.emplace_back(std::make_unique<Column<int64_t>>(colNames[i]));
-            } else {
-                return TuringRequestError::result(TuringRequestErrorType::UNKOWN_COLUMN_TYPE);
-            }
-        }
-    }
-
-    for (const auto& jsonData : res[0]["data"]) {
-        for (size_t i = 0; i < numCols; ++i) {
-            switch (result[i].get()->columnType()) {
-                case ColumnType::STRING: {
-                    auto* col = static_cast<Column<std::string>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<std::string>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                case ColumnType::BOOL: {
-                    auto* col = static_cast<Column<CustomBool>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<bool>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                case ColumnType::UINT: {
-                    auto* col = static_cast<Column<uint64_t>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<uint64_t>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                case ColumnType::INT: {
-                    auto* col = static_cast<Column<int64_t>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<int64_t>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                default:
-                    break;
-            };
-        }
-    }
-
-    return {};
 }
 
 TuringRequestResult<void> TuringRequest::query(const std::string& query, const std::string& graph,
@@ -202,7 +146,7 @@ TuringRequestResult<void> TuringRequest::query(const std::string& query, const s
     }
 
     _buffer.push_back('\0');
-    return parseJson(_buffer.data(), result, _buffer.size());
+    return parseJson(_buffer.data(), result);
 
     return {};
 }

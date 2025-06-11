@@ -1,5 +1,7 @@
 add_library(turing_request
-    TuringRequest.cpp)
+    TuringRequest.cpp
+    TuringRequestResult.cpp
+    JsonUtils.cpp)
 
 target_include_directories(turing_request PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

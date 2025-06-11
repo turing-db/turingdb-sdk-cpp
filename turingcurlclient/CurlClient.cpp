@@ -28,7 +28,7 @@ CurlClientResult<void> CurlClient::sendRequest(const RequestObject& req, WriteCa
 
     switch (req.method) {
         case HTTP_METHOD::POST:
-            if (auto res = curlReq.setPost(req.body); res) {
+            if (auto res = curlReq.setPost(req.body); !res) {
                 return res;
             }
             break;
@@ -37,15 +37,15 @@ CurlClientResult<void> CurlClient::sendRequest(const RequestObject& req, WriteCa
     }
 
     auto fullUrl = std::string(req.url) + std::string(req.endpoint);
-    if (auto res = curlReq.setUrl(fullUrl); res) {
+    if (auto res = curlReq.setUrl(fullUrl); !res) {
         return res;
     }
 
-    if (auto res = curlReq.setWriteCallBack(func); res) {
+    if (auto res = curlReq.setWriteCallBack(func); !res) {
         return res;
     }
 
-    if (auto res = curlReq.send(); res) {
+    if (auto res = curlReq.send(); !res) {
         return res;
     }
 

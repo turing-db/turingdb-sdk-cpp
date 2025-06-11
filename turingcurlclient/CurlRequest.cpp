@@ -1,7 +1,6 @@
 #include "CurlRequest.h"
 
 #include <curl/curl.h>
-#include <iostream>
 
 #include "Profiler.h"
 
@@ -32,6 +31,18 @@ CurlClientResult<void> CurlRequest::setPost(const std::string& postFields) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
 
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_TRANSFER_DECODING, 1L); res != CURLE_OK) {
+        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_CONTENT_DECODING, 1L); res != CURLE_OK) {
+        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_ACCEPT_ENCODING, ""); res != CURLE_OK) {
+        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
+    }
+
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POSTFIELDS, postFields.c_str()); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
@@ -44,8 +55,11 @@ CurlClientResult<void> CurlRequest::setPost(const std::string& postFields) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
 
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_FAILONERROR, 1L); res != CURLE_OK) {
+        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
+    }
+
     if (auto res = curl_easy_setopt(_handle, CURLOPT_BUFFERSIZE, CURL_MAX_READ_SIZE); res != CURLE_OK) {
-        std::cout << "could not set buffersize" << std::endl;
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
 
@@ -70,7 +84,13 @@ CurlClientResult<void> CurlRequest::send() {
     Profile profile {"CurlRequest::send"};
 
     if (auto res = curl_easy_perform(_handle); res != CURLE_OK) {
-        std::cerr << "Failed to perform: " << curl_easy_strerror(res) << std::endl;
+        if (res == CURLE_HTTP_RETURNED_ERROR) {
+            long responseCode {};
+            curl_easy_getinfo(_handle, CURLINFO_RESPONSE_CODE, &responseCode);
+            return CurlClientError::result(CurlClientErrorType::HTTP_ERROR, responseCode);
+        }
+
+
         return CurlClientError::result(CurlClientErrorType::CANNOT_SEND_REQUEST, res);
     }
 
