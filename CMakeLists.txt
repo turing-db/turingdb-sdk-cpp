@@ -88,6 +88,8 @@ execute_process(
         ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
 )
 
+enable_testing()
+
 # threads
 find_package(Threads REQUIRED)
 
@@ -104,4 +106,3 @@ add_subdirectory(requests)
 add_subdirectory(common)
 add_subdirectory(test)
 
-enable_testing()
