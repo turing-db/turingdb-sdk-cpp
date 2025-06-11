@@ -10,7 +10,6 @@
 using namespace turingClient;
 using json = nlohmann::json;
 
-
 TuringRequest::TuringRequest(std::string& url)
     : _client(CurlClient::getCurlClient()),
     _url(url)
@@ -28,7 +27,7 @@ TuringRequestResult<void> TuringRequest::listAvailableGraphs(std::vector<std::st
             return size * nmemb;
         }
 
-        json res {json::parse(ptr, ptr + size * nmemb, nullptr, false)};
+        json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
         if (res.is_discarded()) {
             ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
             return size * nmemb;
@@ -38,12 +37,12 @@ TuringRequestResult<void> TuringRequest::listAvailableGraphs(std::vector<std::st
             return size * nmemb;
         }
 
-        if (!res[0].contains("data")) {
+        if (!res.contains("data")) {
             ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
 
-        auto jsonVec = res[0]["data"].get<std::vector<std::string>>();
+        auto jsonVec = res["data"].get<std::vector<std::string>>();
         result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
 
         return size * nmemb;
@@ -67,7 +66,7 @@ TuringRequestResult<void> TuringRequest::listLoadedGraphs(std::vector<std::strin
             return size * nmemb;
         }
 
-        json res {json::parse(ptr, ptr + size * nmemb, nullptr, false)};
+        json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
         if (res.is_discarded()) {
             ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
             return size * nmemb;
@@ -77,11 +76,11 @@ TuringRequestResult<void> TuringRequest::listLoadedGraphs(std::vector<std::strin
             return size * nmemb;
         }
 
-        if (!res[0].contains("data")) {
+        if (!res.contains("data")) {
             ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
-        auto jsonVec = res[0]["data"][0][0].get<std::vector<std::string>>();
+        auto jsonVec = res["data"][0][0].get<std::vector<std::string>>();
         result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
 
         return size * nmemb;
@@ -106,7 +105,7 @@ TuringRequestResult<void> TuringRequest::loadGraph(std::string_view graph) {
             return size * nmemb;
         }
 
-        json res {json::parse(ptr, ptr + size * nmemb, nullptr, false)};
+        json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
         if (res.is_discarded()) {
             ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
             return size * nmemb;

@@ -6,7 +6,6 @@
 #include "TypedColumn.h"
 #include <memory>
 
-
 namespace turingClient {
 
 class TuringRequest {

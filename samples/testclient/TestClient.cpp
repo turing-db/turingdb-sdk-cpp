@@ -35,20 +35,9 @@ int main() {
         std::cout << res.error().fmtMessage() << std::endl;
     }
 
-    // std::vector<std::string> res;
-    // if(auto n = request.listLoadedGraphs(res); !n){
-    //     std::cout<<n.error().fmtMessage()<<std::endl;
-    //     return 0;
-    // }
-    // for (const auto& graph : res) {
-    //     std::cout << graph << std::endl;
-    // }
-
-
-
     std::string query = "match n-[e]-m return n,n.name,e.duration, m.hasPhD";
     std::vector<std::unique_ptr<TypedColumn>> result;
     request.query(query, graph, result);
 
-    // printTypedColumns(result);
+    printTypedColumns(result);
 }

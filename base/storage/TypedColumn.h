@@ -34,21 +34,19 @@ enum ColumnType : uint8_t {
     UINT,
     DOUBLE,
     STRING,
-    BOOL,
-    FLOAT
+    BOOL
     // Add more types as needed
 };
 
 template <typename T>
-concept SupportedColumnType = std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string> || std::is_same_v<T, CustomBool> || std::is_same_v<T, float>;
-
+concept SupportedColumnType = std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string> || std::is_same_v<T, CustomBool>;
 
 class TypedColumn {
 public:
     virtual ~TypedColumn() = default;
     virtual std::size_t size() const = 0;
-    virtual void* data() = 0;
     virtual const void* data() const = 0;
+    virtual const void* mask() const = 0;
 
     virtual ColumnType columnType() const = 0;
 };
@@ -72,8 +70,6 @@ private:
             return ColumnType::STRING;
         } else if constexpr (std::is_same_v<ColType, CustomBool>) {
             return ColumnType::BOOL;
-        } else if constexpr (std::is_same_v<ColType, float>) {
-            return ColumnType::FLOAT;
         }
     }
 
@@ -83,23 +79,6 @@ public:
     explicit Column(std::string colName)
     :_colName(std::move(colName))
     {
-    }
-
-    explicit Column(std::vector<std::optional<ColType>> col)
-        requires(!std::same_as<ColType, CustomBool>)
-    {
-        _data.reserve(col.size());
-        _mask.reserve(col.size());
-
-        for (const auto& val : col) {
-            if (val.has_value()) {
-                _data.push_back(val.value());
-                _mask.push_back(0);
-            } else {
-                _data.push_back(ColType {});
-                _mask.push_back(1);
-            }
-        }
     }
 
     Column(std::initializer_list<std::optional<ColType>> col)
@@ -119,22 +98,6 @@ public:
         }
     }
 
-    explicit Column(std::vector<std::optional<bool>>& col)
-        requires std::same_as<ColType, CustomBool>
-    {
-        _data.reserve(col.size());
-
-        for (const auto& val : col) {
-            if (val.has_value()) {
-                _data.push_back(CustomBool(val.value()));
-                _mask.push_back(0);
-            } else {
-                _data.push_back(ColType {});
-                _mask.push_back(1);
-            }
-        }
-    }
-
     Column(std::initializer_list<std::optional<bool>> col)
         requires std::same_as<ColType, CustomBool>
     {
@@ -145,7 +108,7 @@ public:
                 _data.push_back(CustomBool(val.value()));
                 _mask.push_back(0);
             } else {
-                _data.push_back(ColType {});
+                _data.push_back(CustomBool {});
                 _mask.push_back(1);
             }
         }
@@ -171,11 +134,9 @@ public:
         return _colName;
     }
 
-    std::vector<ColType>& get() { return _data; }
     const std::vector<ColType>& get() const { return _data; }
 
     // MaskOps
-    std::vector<int8_t>& getMask() { return _mask; }
     const std::vector<int8_t>& getMask() const { return _mask; }
 
     void pushDataAndMask(const ColType& data, const int8_t mask) {
@@ -191,8 +152,8 @@ public:
     }
 
     size_t size() const override { return _data.size(); }
-    void* data() override { return _data.data(); }
     const void* data() const override { return _data.data(); }
+    const void* mask() const override { return _mask.data(); }
 
     bool isValid(size_t index) {
         if (_mask[index]) {

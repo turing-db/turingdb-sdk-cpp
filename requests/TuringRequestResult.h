@@ -1,10 +1,10 @@
 #pragma once
 
-#include "BasicResult.h"
-#include "CurlClientResult.h"
-#include "EnumToString.h"
-
 #include <spdlog/fmt/bundled/format.h>
+
+#include "BasicResult.h"
+#include "EnumToString.h"
+#include "CurlClientResult.h"
 
 namespace turingClient {
 
