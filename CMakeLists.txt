@@ -102,5 +102,6 @@ add_subdirectory(samples)
 add_subdirectory(turingcurlclient)
 add_subdirectory(requests)
 add_subdirectory(common)
+add_subdirectory(test)
 
 enable_testing()
