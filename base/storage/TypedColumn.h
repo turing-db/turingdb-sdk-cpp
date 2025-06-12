@@ -46,7 +46,9 @@ public:
     virtual ~TypedColumn() = default;
     virtual std::size_t size() const = 0;
     virtual const void* data() const = 0;
+    virtual void* data() = 0;
     virtual const void* mask() const = 0;
+    virtual void* mask() = 0;
 
     virtual ColumnType columnType() const = 0;
 };
@@ -153,7 +155,9 @@ public:
 
     size_t size() const override { return _data.size(); }
     const void* data() const override { return _data.data(); }
+    void* data() override { return _data.data(); }
     const void* mask() const override { return _mask.data(); }
+    void* mask() override { return _mask.data(); }
 
     bool isValid(size_t index) {
         if (_mask[index]) {
