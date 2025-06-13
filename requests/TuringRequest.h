@@ -11,8 +11,10 @@ namespace turingClient {
 class TuringRequest {
 
 public:
-    explicit TuringRequest(const std::string& url);
+    explicit TuringRequest(std::string& url);
     ~TuringRequest() = default;
+
+    void setUrl(std::string& url) { _url = std::move(url); }
 
     TuringRequestResult<void> listLoadedGraphs(std::vector<std::string>& result);
     TuringRequestResult<void> listAvailableGraphs(std::vector<std::string>& result);
@@ -23,7 +25,7 @@ public:
 
 private:
     CurlClient& _client;
-    const std::string& _url;
+    std::string _url;
     std::vector<char> _buffer;
 };
 }

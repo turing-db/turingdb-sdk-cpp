@@ -10,9 +10,9 @@
 using namespace turingClient;
 using json = nlohmann::json;
 
-TuringRequest::TuringRequest(const std::string& url)
+TuringRequest::TuringRequest(std::string& url)
     : _client(CurlClient::getCurlClient()),
-    _url(url)
+    _url(std::move(url))
 {
 }
 
