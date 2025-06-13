@@ -93,7 +93,7 @@ TuringRequestResult<void> TuringRequest::listLoadedGraphs(std::vector<std::strin
     return ret;
 }
 
-TuringRequestResult<void> TuringRequest::loadGraph(std::string& graph) {
+TuringRequestResult<void> TuringRequest::loadGraph(const std::string& graph) {
     const auto loadGraphURI = "/load_graph?graph=" + graph;
     const RequestObject req = {HTTP_METHOD::POST, _url, loadGraphURI};
 
