@@ -10,7 +10,7 @@
 using namespace turingClient;
 using json = nlohmann::json;
 
-TuringRequest::TuringRequest(std::string& url)
+TuringRequest::TuringRequest(const std::string& url)
     : _client(CurlClient::getCurlClient()),
     _url(url)
 {
@@ -22,7 +22,7 @@ TuringRequestResult<void> TuringRequest::listAvailableGraphs(std::vector<std::st
     TuringRequestResult<void> ret;
 
     auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        if (!ptr || strlen(ptr) == 0) {
+        if (!ptr || !*ptr) {
             ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
@@ -61,7 +61,7 @@ TuringRequestResult<void> TuringRequest::listLoadedGraphs(std::vector<std::strin
     TuringRequestResult<void> ret;
 
     auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        if (!ptr || strlen(ptr) == 0) {
+        if (!ptr || !*ptr) {
             ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
@@ -100,7 +100,7 @@ TuringRequestResult<void> TuringRequest::loadGraph(std::string_view graph) {
     TuringRequestResult<void> ret;
 
     auto func = [&ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        if (!ptr || strlen(ptr) == 0) {
+        if (!ptr || !*ptr) {
             ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
@@ -123,7 +123,8 @@ TuringRequestResult<void> TuringRequest::loadGraph(std::string_view graph) {
     return ret;
 }
 
-TuringRequestResult<void> TuringRequest::query(const std::string& query, const std::string& graph,
+TuringRequestResult<void> TuringRequest::query(const std::string& query,
+                                               const std::string& graph,
                                                std::vector<std::unique_ptr<TypedColumn>>& result) {
     Profile profile {"TuringRequest::query"};
 

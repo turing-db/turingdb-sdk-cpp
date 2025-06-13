@@ -43,13 +43,15 @@ public:
     {
     }
 
-    TuringRequestError(TuringRequestErrorType type, CurlClientError curlError)
+    TuringRequestError(TuringRequestErrorType type,
+                       CurlClientError curlError)
         : _type(type),
         _curlError(curlError)
     {
     }
 
-    TuringRequestError(TuringRequestErrorType type, const std::string& errorMsg)
+    TuringRequestError(TuringRequestErrorType type,
+                       const std::string& errorMsg)
         : _type(type),
         _errorMsg(errorMsg)
     {
@@ -64,11 +66,13 @@ public:
         return BadResult<TuringRequestError>(TuringRequestError(type));
     }
 
-    static BadResult<TuringRequestError> result(TuringRequestErrorType type, CurlClientError curlError) {
+    static BadResult<TuringRequestError> result(TuringRequestErrorType type,
+                                                CurlClientError curlError) {
         return BadResult<TuringRequestError>(TuringRequestError(type, curlError));
     }
 
-    static BadResult<TuringRequestError> result(TuringRequestErrorType type, const std::string& errorMsg) {
+    static BadResult<TuringRequestError> result(TuringRequestErrorType type,
+                                                const std::string& errorMsg) {
         return BadResult<TuringRequestError>(TuringRequestError(type, errorMsg));
     }
 

@@ -22,7 +22,8 @@ CurlClient::~CurlClient() {
     curl_global_cleanup();
 }
 
-CurlClientResult<void> CurlClient::sendRequest(const RequestObject& req, WriteCallBack func) {
+CurlClientResult<void> CurlClient::sendRequest(const RequestObject& req,
+                                               WriteCallBack func) {
     Profile profile {"CurlClient::sendRequest"};
     CurlRequest& curlReq = _handles.emplace_back();
 

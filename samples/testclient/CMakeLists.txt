@@ -5,8 +5,8 @@ target_include_directories(TestClient PRIVATE ${CURL_INCLUDE_DIRS})
 target_link_libraries(TestClient PRIVATE ${CURL_LIBRARIES})
 
 target_link_libraries(TestClient PRIVATE 
-    typed_column
-    turing_request)
+    turing_client_cpp_typed_column
+    turing_client_cpp_request)
 
 
 install(

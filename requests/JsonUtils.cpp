@@ -5,7 +5,8 @@
 
 namespace turingClient {
 
-TuringRequestResult<void> checkJsonError(const json& jsonMsg, const TuringRequestErrorType retErrType) {
+TuringRequestResult<void> checkJsonError(const json& jsonMsg,
+                                         const TuringRequestErrorType& retErrType) {
     if ((!jsonMsg.is_object())) {
         return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
     }
@@ -19,16 +20,15 @@ TuringRequestResult<void> checkJsonError(const json& jsonMsg, const TuringReques
     return {};
 }
 
-TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<TypedColumn>>& result) {
+TuringRequestResult<void> parseJson(char* location,
+                                    std::vector<std::unique_ptr<TypedColumn>>& result) {
     Profile profile {"TuringRequest::parseJson"};
 
-    if (!location || strlen(location) == 0) {
+    if (!location || !*location) {
         return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    Profile* jsonParseProfile = new Profile("json Parsing");
     const json res = json::parse(location, nullptr, false);
-    delete jsonParseProfile;
 
     if (res.is_discarded()) {
         return TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
@@ -38,11 +38,16 @@ TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<
         return ret;
     }
 
-    if (!res.contains("header") || !res.contains("data") || !res["data"].is_array()) {
+    if (res.contains("header")) {
+        const auto& header = res["header"];
+        if (!header.contains("column_names") || !header.contains("column_types") || !header["column_names"].is_array() || !header["column_types"].is_array()) {
+            return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+        }
+    } else {
         return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    if (!res["header"].contains("column_names") || !res["header"].contains("column_types") || !res["header"]["column_names"].is_array() || !res["header"]["column_types"].is_array()) {
+    if (!res.contains("data") || !res["data"].is_array()) {
         return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
     }
 
@@ -67,12 +72,13 @@ TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<
         }
     }
 
-    for (const auto& jsonData : res["data"]) {
+    const auto& jsonData = res["data"];
+    for (const auto& data : jsonData) {
         for (size_t i = 0; i < numCols; ++i) {
             switch (result[i].get()->columnType()) {
                 case ColumnType::STRING: {
                     auto* col = static_cast<Column<std::string>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
+                    for (const auto& val : data[i]) {
                         if (!val.is_null()) {
                             col->push_back(val.get<std::string>());
                         } else {
@@ -83,7 +89,7 @@ TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<
                 }
                 case ColumnType::BOOL: {
                     auto* col = static_cast<Column<CustomBool>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
+                    for (const auto& val : data[i]) {
                         if (!val.is_null()) {
                             col->push_back(val.get<bool>());
                         } else {
@@ -94,7 +100,7 @@ TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<
                 }
                 case ColumnType::UINT: {
                     auto* col = static_cast<Column<uint64_t>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
+                    for (const auto& val : data[i]) {
                         if (!val.is_null()) {
                             col->push_back(val.get<uint64_t>());
                         } else {
@@ -105,7 +111,7 @@ TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<
                 }
                 case ColumnType::INT: {
                     auto* col = static_cast<Column<int64_t>*>(result[i].get());
-                    for (const auto& val : jsonData[i]) {
+                    for (const auto& val : data[i]) {
                         if (!val.is_null()) {
                             col->push_back(val.get<int64_t>());
                         } else {
@@ -122,5 +128,4 @@ TuringRequestResult<void> parseJson(char* location, std::vector<std::unique_ptr<
 
     return {};
 }
-
 }

@@ -10,7 +10,8 @@ namespace turingClient {
 
 class CurlClient {
 public:
-    CurlClientResult<void> sendRequest(const RequestObject& req, WriteCallBack func);
+    CurlClientResult<void> sendRequest(const RequestObject& req,
+                                       WriteCallBack func);
 
     static CurlClient& getCurlClient() {
         static CurlClient client;
@@ -27,6 +28,4 @@ private:
 
     std::vector<CurlRequest> _handles;
 };
-
-
 }

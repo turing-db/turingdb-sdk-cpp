@@ -1,16 +1,16 @@
-set(curl_client_sources
+set(curl_client_sources STATIC
     CurlClient.cpp
     CurlRequest.cpp
     CurlClientResult.cpp)
 
-add_library(turing_curl_client ${curl_client_sources})
+add_library(turing_client_cpp_curl ${curl_client_sources})
 
-target_include_directories(turing_curl_client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(turing_client_cpp_curl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_include_directories(turing_curl_client PRIVATE ${CURL_INCLUDE_DIRS})
-target_link_libraries(turing_curl_client PRIVATE ${CURL_LIBRARIES})
+target_include_directories(turing_client_cpp_curl PRIVATE ${CURL_INCLUDE_DIRS})
+target_link_libraries(turing_client_cpp_curl PRIVATE ${CURL_LIBRARIES})
 
-target_link_libraries(turing_curl_client PRIVATE 
+target_link_libraries(turing_client_cpp_curl PRIVATE 
     turing_common_s
-    common_headers)
+    turing_client_cpp_common_headers)
 

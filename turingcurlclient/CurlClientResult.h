@@ -32,13 +32,17 @@ using CurlClientErrorTypeDescription = EnumToString<CurlClientErrorType>::Create
 class CurlClientError {
 public:
     CurlClientError() = default;
-    CurlClientError(CurlClientErrorType type, const int libCurlError)
+    CurlClientError(CurlClientErrorType type,
+                    const int libCurlError)
         : _type(type),
-          _libCurlError(libCurlError) {
+          _libCurlError(libCurlError)
+    {
     }
-    CurlClientError(CurlClientErrorType type, const long httpErrorCode)
+    CurlClientError(CurlClientErrorType type,
+                    const long httpErrorCode)
         : _type(type),
-          _httpErrorCode(httpErrorCode) {
+          _httpErrorCode(httpErrorCode)
+    {
     }
 
     [[nodiscard]] CurlClientErrorType getType() const { return _type; }
@@ -46,7 +50,8 @@ public:
     [[nodiscard]] std::string fmtMessage() const;
 
     template <typename... T>
-    static BadResult<CurlClientError> result(CurlClientErrorType type, int libCurlError = 0) {
+    static BadResult<CurlClientError> result(CurlClientErrorType type,
+                                             int libCurlError = 0) {
         return BadResult<CurlClientError>(CurlClientError(type, libCurlError));
     }
 
