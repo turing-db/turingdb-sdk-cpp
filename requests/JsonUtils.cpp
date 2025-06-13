@@ -3,10 +3,10 @@
 #include "Profiler.h"
 #include "TypedColumn.h"
 
-namespace turingClient {
+using namespace turingClient;
 
-TuringRequestResult<void> checkJsonError(const json& jsonMsg,
-                                         const TuringRequestErrorType& retErrType) {
+TuringRequestResult<void> turingClient::checkJsonError(const json& jsonMsg,
+                                                       const TuringRequestErrorType& retErrType) {
     if ((!jsonMsg.is_object())) {
         return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
     }
@@ -20,8 +20,8 @@ TuringRequestResult<void> checkJsonError(const json& jsonMsg,
     return {};
 }
 
-TuringRequestResult<void> parseJson(char* location,
-                                    std::vector<std::unique_ptr<TypedColumn>>& result) {
+TuringRequestResult<void> turingClient::parseJson(char* location,
+                                                  std::vector<std::unique_ptr<TypedColumn>>& result) {
     Profile profile {"TuringRequest::parseJson"};
 
     if (!location || !*location) {
@@ -127,5 +127,4 @@ TuringRequestResult<void> parseJson(char* location,
     }
 
     return {};
-}
 }

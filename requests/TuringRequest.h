@@ -18,7 +18,7 @@ public:
 
     TuringRequestResult<void> listLoadedGraphs(std::vector<std::string>& result);
     TuringRequestResult<void> listAvailableGraphs(std::vector<std::string>& result);
-    TuringRequestResult<void> loadGraph(std::string_view graph);
+    TuringRequestResult<void> loadGraph(std::string& graph);
     TuringRequestResult<void> query(const std::string& query,
                                     const std::string& graph,
                                     std::vector<std::unique_ptr<TypedColumn>>& result);

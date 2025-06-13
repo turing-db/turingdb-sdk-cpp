@@ -42,6 +42,14 @@ template <typename T>
 concept SupportedColumnType = std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string> || std::is_same_v<T, CustomBool>;
 
 class TypedColumn {
+protected:
+    std::string _colName;
+    TypedColumn() = default;
+    explicit TypedColumn(std::string colName)
+        : _colName(std::move(colName))
+    {
+    }
+
 public:
     virtual ~TypedColumn() = default;
     virtual std::size_t size() const = 0;
@@ -51,6 +59,8 @@ public:
     virtual void* mask() = 0;
 
     virtual ColumnType columnType() const = 0;
+    virtual const std::string& getColumnName() const = 0;
+    virtual void setColumnName(std::string& name) = 0;
 };
 
 template <SupportedColumnType ColType>
@@ -58,7 +68,6 @@ class Column : public TypedColumn {
 private:
     std::vector<ColType> _data;
     std::vector<int8_t> _mask;
-    std::string _colName;
 
     // Map C++ types to enum values
     static constexpr ColumnType getColumnType() {
@@ -79,7 +88,7 @@ public:
     Column() = default;
 
     explicit Column(std::string colName)
-    :_colName(std::move(colName))
+    :TypedColumn(std::move(colName))
     {
     }
 
@@ -127,12 +136,14 @@ public:
         return _data == other._data && _mask == other._mask;
     }
 
-
     ColumnType columnType() const override {
         return getColumnType();
     }
 
-    std::string& getColumnName() {
+    void setColumnName(std::string& name) override {
+        _colName = std::move(name);
+    }
+    const std::string& getColumnName() const override {
         return _colName;
     }
 
