@@ -2,7 +2,7 @@
 #include <curl/curl.h>
 #include <memory>
 
-#include "TuringRequest.h"
+#include "TuringClient.h"
 
 using namespace turingClient;
 
@@ -29,7 +29,7 @@ void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
 
 int main() {
     std::string url = "http://127.0.0.1:6666";
-    turingClient::TuringRequest request(url);
+    turingClient::TuringClient request(url);
     std::string graph = "simpledb";
     if (auto res = request.loadGraph(graph); !res) {
         std::cout << res.error().fmtMessage() << std::endl;

@@ -1,4 +1,4 @@
-#include "TuringRequest.h"
+#include "TuringClient.h"
 
 #include "Profiler.h"
 #include "RequestObject.h"
@@ -10,35 +10,35 @@
 using namespace turingClient;
 using json = nlohmann::json;
 
-TuringRequest::TuringRequest(std::string& url)
+TuringClient::TuringClient(std::string& url)
     : _client(CurlClient::getCurlClient()),
     _url(std::move(url))
 {
 }
 
-TuringRequestResult<void> TuringRequest::listAvailableGraphs(std::vector<std::string>& result) {
+TuringClientResult<void> TuringClient::listAvailableGraphs(std::vector<std::string>& result) {
     RequestObject req = {HTTP_METHOD::POST, _url, "/list_avail_graphs"};
 
-    TuringRequestResult<void> ret;
+    TuringClientResult<void> ret;
 
     auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
         if (!ptr || !*ptr) {
-            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
 
         json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
         if (res.is_discarded()) {
-            ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
             return size * nmemb;
         }
 
-        if (ret = checkJsonError(res, TuringRequestErrorType::CANNOT_LIST_AVAILABLE_GRAPHS); !ret) {
+        if (ret = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS); !ret) {
             return size * nmemb;
         }
 
         if (!res.contains("data")) {
-            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
 
@@ -49,35 +49,35 @@ TuringRequestResult<void> TuringRequest::listAvailableGraphs(std::vector<std::st
     };
 
     if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringRequestError::result(TuringRequestErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
     }
 
     return ret;
 }
 
-TuringRequestResult<void> TuringRequest::listLoadedGraphs(std::vector<std::string>& result) {
+TuringClientResult<void> TuringClient::listLoadedGraphs(std::vector<std::string>& result) {
     const RequestObject req = {HTTP_METHOD::POST, _url, "/list_loaded_graphs"};
 
-    TuringRequestResult<void> ret;
+    TuringClientResult<void> ret;
 
     auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
         if (!ptr || !*ptr) {
-            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
 
         json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
         if (res.is_discarded()) {
-            ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
             return size * nmemb;
         }
 
-        if (ret = checkJsonError(res, TuringRequestErrorType::CANNOT_LIST_LOADED_GRAPHS); !ret) {
+        if (ret = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS); !ret) {
             return size * nmemb;
         }
 
         if (!res.contains("data")) {
-            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
         auto jsonVec = res["data"][0][0].get<std::vector<std::string>>();
@@ -87,46 +87,46 @@ TuringRequestResult<void> TuringRequest::listLoadedGraphs(std::vector<std::strin
     };
 
     if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringRequestError::result(TuringRequestErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
     }
 
     return ret;
 }
 
-TuringRequestResult<void> TuringRequest::loadGraph(const std::string& graph) {
+TuringClientResult<void> TuringClient::loadGraph(const std::string& graph) {
     const auto loadGraphURI = "/load_graph?graph=" + graph;
     const RequestObject req = {HTTP_METHOD::POST, _url, loadGraphURI};
 
-    TuringRequestResult<void> ret;
+    TuringClientResult<void> ret;
 
     auto func = [&ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
         if (!ptr || !*ptr) {
-            ret = TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
         }
 
         json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
         if (res.is_discarded()) {
-            ret = TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
+            ret = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
             return size * nmemb;
         }
 
-        ret = checkJsonError(res, TuringRequestErrorType::CANNOT_LOAD_GRAPH);
+        ret = checkJsonError(res, TuringClientErrorType::CANNOT_LOAD_GRAPH);
 
         return size * nmemb;
     };
 
     if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringRequestError::result(TuringRequestErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
     }
 
     return ret;
 }
 
-TuringRequestResult<void> TuringRequest::query(const std::string& query,
-                                               const std::string& graph,
-                                               std::vector<std::unique_ptr<TypedColumn>>& result) {
-    Profile profile {"TuringRequest::query"};
+TuringClientResult<void> TuringClient::query(const std::string& query,
+                                             const std::string& graph,
+                                             std::vector<std::unique_ptr<TypedColumn>>& result) {
+    Profile profile {"TuringClient::query"};
 
     _buffer.clear();
 
@@ -142,7 +142,7 @@ TuringRequestResult<void> TuringRequest::query(const std::string& query,
     };
 
     if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringRequestError::result(TuringRequestErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
     }
 
     _buffer.push_back('\0');

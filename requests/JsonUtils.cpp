@@ -5,53 +5,57 @@
 
 using namespace turingClient;
 
-TuringRequestResult<void> turingClient::checkJsonError(const json& jsonMsg,
-                                                       const TuringRequestErrorType& retErrType) {
+TuringClientResult<void> turingClient::checkJsonError(const json& jsonMsg,
+                                                      const TuringClientErrorType& retErrType) {
     if ((!jsonMsg.is_object())) {
-        return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
     if (jsonMsg.contains("error")) {
         const auto& errorMsg = jsonMsg["error"];
         if (!errorMsg.is_null()) {
-            return TuringRequestError::result(retErrType, errorMsg.get<std::string>());
+            return TuringClientError::result(retErrType, errorMsg.get<std::string>());
         }
     }
     return {};
 }
 
-TuringRequestResult<void> turingClient::parseJson(char* location,
-                                                  std::vector<std::unique_ptr<TypedColumn>>& result) {
-    Profile profile {"TuringRequest::parseJson"};
+TuringClientResult<void> turingClient::parseJson(char* location,
+                                                 std::vector<std::unique_ptr<TypedColumn>>& result) {
+    Profile profile {"TuringClient::parseJson"};
 
     if (!location || !*location) {
-        return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
     const json res = json::parse(location, nullptr, false);
 
     if (res.is_discarded()) {
-        return TuringRequestError::result(TuringRequestErrorType::INVALID_JSON_FORMAT);
+        return TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
     }
 
-    if (auto ret = checkJsonError(res, turingClient::TuringRequestErrorType::TURING_QUERY_FAILED); !ret) {
+    if (auto ret = checkJsonError(res, turingClient::TuringClientErrorType::TURING_QUERY_FAILED); !ret) {
         return ret;
     }
 
-    if (res.contains("header")) {
-        const auto& header = res["header"];
-        if (!header.contains("column_names") || !header.contains("column_types") || !header["column_names"].is_array() || !header["column_types"].is_array()) {
-            return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
-        }
-    } else {
-        return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
-    }
-
-    if (!res.contains("data") || !res["data"].is_array()) {
-        return TuringRequestError::result(TuringRequestErrorType::UNKNOWN_JSON_FORMAT);
+    if (!res.contains("header")) {
+        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
     const auto& jsonHeader = res["header"];
+    if (!jsonHeader.contains("column_names") || !jsonHeader.contains("column_types") || !jsonHeader["column_names"].is_array() || !jsonHeader["column_types"].is_array()) {
+        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+    }
+
+    if (!res.contains("data")) {
+        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+    }
+
+    const auto& jsonData = res["data"];
+    if (!jsonData.is_array()) {
+        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+    }
+
     const auto colNames = jsonHeader["column_names"].get<std::vector<std::string>>();
     const auto colTypes = jsonHeader["column_types"].get<std::vector<std::string>>();
     const auto numCols = colNames.size();
@@ -67,12 +71,11 @@ TuringRequestResult<void> turingClient::parseJson(char* location,
             } else if (colTypes[i] == "Int64") {
                 result.emplace_back(std::make_unique<Column<int64_t>>(colNames[i]));
             } else {
-                return TuringRequestError::result(TuringRequestErrorType::UNKOWN_COLUMN_TYPE);
+                return TuringClientError::result(TuringClientErrorType::UNKOWN_COLUMN_TYPE);
             }
         }
     }
 
-    const auto& jsonData = res["data"];
     for (const auto& data : jsonData) {
         for (size_t i = 0; i < numCols; ++i) {
             switch (result[i].get()->columnType()) {

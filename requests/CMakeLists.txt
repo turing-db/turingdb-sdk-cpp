@@ -1,13 +1,13 @@
-add_library(turing_client_cpp_request STATIC
-    TuringRequest.cpp
-    TuringRequestResult.cpp
+add_library(turing_client_cpp_s STATIC
+    TuringClient.cpp
+    TuringClientResult.cpp
     JsonUtils.cpp)
 
-target_include_directories(turing_client_cpp_request PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(turing_client_cpp_s PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_include_directories(turing_client_cpp_request PRIVATE ${CURL_INCLUDE_DIRS})
-target_link_libraries(turing_client_cpp_request PRIVATE ${CURL_LIBRARIES})
-target_link_libraries(turing_client_cpp_request PUBLIC
+target_include_directories(turing_client_cpp_s PRIVATE ${CURL_INCLUDE_DIRS})
+target_link_libraries(turing_client_cpp_s PRIVATE ${CURL_LIBRARIES})
+target_link_libraries(turing_client_cpp_s PUBLIC
                     turing_client_cpp_curl
                     turing_common_s
                     nlohmann_json
