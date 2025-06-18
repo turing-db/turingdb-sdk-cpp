@@ -10,14 +10,6 @@ namespace turingClient {
 
 class TuringClient {
 
-    enum TuringClientOps : int8_t {
-        LIST_AVAILBLE_GRAPHS,
-        LIST_LOADED_GRAPHS,
-        LOAD_GRAPH,
-        QUERY,
-        SIZE
-    };
-
 public:
     explicit TuringClient(std::string& url);
     ~TuringClient() = default;
