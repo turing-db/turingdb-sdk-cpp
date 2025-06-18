@@ -31,8 +31,16 @@ int main() {
     std::string url = "http://127.0.0.1:6666";
     turingClient::TuringClient request(url);
     std::string graph = "simpledb";
+    std::string graphFake = "simplestdb";
+
     if (auto res = request.loadGraph(graph); !res) {
-        std::cout << res.error().fmtMessage() << std::endl;
+        std::cout << request.getError().fmtMessage() << std::endl;
+    }
+    if (auto res = request.loadGraph(graphFake); !res) {
+        std::cout << request.getError().fmtMessage() << std::endl;
+    }
+    if (auto res = request.loadGraph(graph); !res) {
+        std::cout << request.getError().fmtMessage() << std::endl;
     }
 
     std::string query = "match n-[e]-m return n,n.name,e.duration, m.hasPhD";

@@ -27,12 +27,14 @@ public:
     const std::string& getUrl() { return _url; }
     void setUrl(std::string& url) { _url = std::move(url); }
 
-    TuringClientResult<void> listLoadedGraphs(std::vector<std::string>& result);
-    TuringClientResult<void> listAvailableGraphs(std::vector<std::string>& result);
-    TuringClientResult<void> loadGraph(const std::string& graph);
-    TuringClientResult<void> query(const std::string& query,
-                                   const std::string& graph,
-                                   std::vector<std::unique_ptr<TypedColumn>>& result);
+    TuringClientError& getError() { return _result.error(); }
+
+    bool listLoadedGraphs(std::vector<std::string>& result);
+    bool listAvailableGraphs(std::vector<std::string>& result);
+    bool loadGraph(const std::string& graph);
+    bool query(const std::string& query,
+               const std::string& graph,
+               std::vector<std::unique_ptr<TypedColumn>>& result);
 
 private:
     CurlClient& _client;
@@ -40,5 +42,7 @@ private:
 
     std::string _url;
     std::vector<char> _buffer;
+
+    TuringClientResult<void> _result;
 };
 }
