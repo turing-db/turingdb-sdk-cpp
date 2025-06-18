@@ -19,6 +19,7 @@ enum class TuringClientErrorType : uint8_t {
     UNKOWN_COLUMN_TYPE,
     CANNOT_LIST_AVAILABLE_GRAPHS,
     CANNOT_LIST_LOADED_GRAPHS,
+    CANNOT_QUERY_GRAPH,
     CANNOT_LOAD_GRAPH,
     _SIZE,
 };
@@ -32,6 +33,7 @@ using TuringClientErrorTypeDescription = EnumToString<TuringClientErrorType>::Cr
     EnumStringPair<TuringClientErrorType::UNKOWN_COLUMN_TYPE, "Type Of Result Column Is Unsupported">,
     EnumStringPair<TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, "Could not list the available graphs">,
     EnumStringPair<TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, "Could not list the loaded graphs">,
+    EnumStringPair<TuringClientErrorType::CANNOT_QUERY_GRAPH, "Could not send query to the graph">,
     EnumStringPair<TuringClientErrorType::CANNOT_LOAD_GRAPH, "Could not load graph">>;
 
 class TuringClientError {

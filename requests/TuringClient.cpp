@@ -12,16 +12,19 @@ using json = nlohmann::json;
 
 TuringClient::TuringClient(std::string& url)
     : _client(CurlClient::getCurlClient()),
+    _handle(_client.createHandle()),
     _url(std::move(url))
 {
+   init(); 
+}
+
+void TuringClient::init() {
 }
 
 TuringClientResult<void> TuringClient::listAvailableGraphs(std::vector<std::string>& result) {
-    RequestObject req = {HTTP_METHOD::POST, _url, "/list_avail_graphs"};
-
     TuringClientResult<void> ret;
 
-    auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
+    WriteCallBack func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
         if (!ptr || !*ptr) {
             ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
@@ -48,19 +51,25 @@ TuringClientResult<void> TuringClient::listAvailableGraphs(std::vector<std::stri
         return size * nmemb;
     };
 
-    if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+    _handle.setUrl(_url + "/list_avail_graphs");
+    if (auto res = _handle.setWriteCallBack(func); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
     }
+    if (auto res = _handle.setPost(""); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
+    }
+    if (auto res = _handle.send(); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
+    }
+
 
     return ret;
 }
 
 TuringClientResult<void> TuringClient::listLoadedGraphs(std::vector<std::string>& result) {
-    const RequestObject req = {HTTP_METHOD::POST, _url, "/list_loaded_graphs"};
-
     TuringClientResult<void> ret;
 
-    auto func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
+    WriteCallBack func = [&result, &ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
         if (!ptr || !*ptr) {
             ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
@@ -86,20 +95,25 @@ TuringClientResult<void> TuringClient::listLoadedGraphs(std::vector<std::string>
         return size * nmemb;
     };
 
-    if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+    _handle.setUrl(_url + "/list_loaded_graphs");
+    if (auto res = _handle.setWriteCallBack(func); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
     }
+    if (auto res = _handle.setPost(""); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
+    }
+    if (auto res = _handle.send(); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
+    }
+
 
     return ret;
 }
 
 TuringClientResult<void> TuringClient::loadGraph(const std::string& graph) {
-    const auto loadGraphURI = "/load_graph?graph=" + graph;
-    const RequestObject req = {HTTP_METHOD::POST, _url, loadGraphURI};
-
     TuringClientResult<void> ret;
 
-    auto func = [&ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
+    WriteCallBack func = [&ret](char* ptr, size_t size, size_t nmemb, void* userdata) {
         if (!ptr || !*ptr) {
             ret = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
             return size * nmemb;
@@ -116,8 +130,17 @@ TuringClientResult<void> TuringClient::loadGraph(const std::string& graph) {
         return size * nmemb;
     };
 
-    if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+    if (auto res = _handle.setWriteCallBack(func); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
+    }
+    if (auto res = _handle.setUrl(_url + "/load_graph?graph=" + graph); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
+    }
+    if (auto res = _handle.setPost(""); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
+    }
+    if (auto res = _handle.send(); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
     }
 
     return ret;
@@ -130,10 +153,7 @@ TuringClientResult<void> TuringClient::query(const std::string& query,
 
     _buffer.clear();
 
-    const auto queryURI = "/query?graph=" + graph;
-    const RequestObject req = {HTTP_METHOD::POST, _url, queryURI, query};
-
-    auto func = [this](char* ptr, size_t size, size_t nmemb, void* userdata) {
+    WriteCallBack func = [this](char* ptr, size_t size, size_t nmemb, void* userdata) {
         size_t oldsize = _buffer.size();
         _buffer.resize(oldsize + size * nmemb);
         memcpy(_buffer.data() + oldsize, ptr, size * nmemb);
@@ -141,8 +161,17 @@ TuringClientResult<void> TuringClient::query(const std::string& query,
         return size * nmemb;
     };
 
-    if (auto res = _client.sendRequest(req, func); !res) {
-        return TuringClientError::result(TuringClientErrorType::CANNOT_SEND_POST_REQUEST, res.error());
+    if (auto res = _handle.setUrl(_url + "/query?graph=" + graph); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
+    }
+    if (auto res = _handle.setWriteCallBack(func); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
+    }
+    if (auto res = _handle.setPost(query); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
+    }
+    if (auto res = _handle.send(); !res) {
+        return TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
     }
 
     _buffer.push_back('\0');

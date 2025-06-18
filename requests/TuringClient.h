@@ -10,9 +10,19 @@ namespace turingClient {
 
 class TuringClient {
 
+    enum TuringClientOps : int8_t {
+        LIST_AVAILBLE_GRAPHS,
+        LIST_LOADED_GRAPHS,
+        LOAD_GRAPH,
+        QUERY,
+        SIZE
+    };
+
 public:
     explicit TuringClient(std::string& url);
     ~TuringClient() = default;
+
+    void init();
 
     const std::string& getUrl() { return _url; }
     void setUrl(std::string& url) { _url = std::move(url); }
@@ -26,6 +36,8 @@ public:
 
 private:
     CurlClient& _client;
+    CurlRequest& _handle;
+
     std::string _url;
     std::vector<char> _buffer;
 };

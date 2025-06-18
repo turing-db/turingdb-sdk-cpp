@@ -12,6 +12,9 @@ class CurlClient {
 public:
     CurlClientResult<void> sendRequest(const RequestObject& req,
                                        WriteCallBack func);
+    CurlRequest& createHandle();
+
+    std::vector<CurlRequest>& getHandles() { return _handles; }
 
     static CurlClient& getCurlClient() {
         static CurlClient client;

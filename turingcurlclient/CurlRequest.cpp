@@ -1,6 +1,7 @@
 #include "CurlRequest.h"
 
 #include <curl/curl.h>
+#include <iostream>
 
 #include "Profiler.h"
 
@@ -9,6 +10,38 @@ using namespace turingClient;
 static size_t staticCallBack(char* ptr, size_t size, size_t nmemb, void* userdata) {
     auto* self = static_cast<CurlRequest*>(userdata);
     return self->callBackFn(ptr, size, nmemb, userdata);
+}
+
+bool CurlRequest::init() {
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_TCP_NODELAY, 1L); res != CURLE_OK) {
+        return false;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_TRANSFER_DECODING, 1L); res != CURLE_OK) {
+        return false;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_CONTENT_DECODING, 1L); res != CURLE_OK) {
+        return false;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_ACCEPT_ENCODING, ""); res != CURLE_OK) {
+        return false;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1); res != CURLE_OK) {
+        return false;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_FAILONERROR, 1L); res != CURLE_OK) {
+        return false;
+    }
+
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_BUFFERSIZE, CURL_MAX_READ_SIZE); res != CURLE_OK) {
+        return false;
+    }
+
+    return true;
 }
 
 CurlClientResult<void> CurlRequest::setUrl(const std::string& url) {
@@ -27,39 +60,11 @@ CurlClientResult<void> CurlRequest::setPost(const std::string& postFields) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
 
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_TCP_NODELAY, 1L); res != CURLE_OK) {
-        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
-    }
-
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_TRANSFER_DECODING, 1L); res != CURLE_OK) {
-        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
-    }
-
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_CONTENT_DECODING, 1L); res != CURLE_OK) {
-        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
-    }
-
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_ACCEPT_ENCODING, ""); res != CURLE_OK) {
-        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
-    }
-
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POSTFIELDS, postFields.c_str()); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
 
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POSTFIELDSIZE, postFields.size()); res != CURLE_OK) {
-        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
-    }
-
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1); res != CURLE_OK) {
-        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
-    }
-
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_FAILONERROR, 1L); res != CURLE_OK) {
-        return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
-    }
-
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_BUFFERSIZE, CURL_MAX_READ_SIZE); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
 

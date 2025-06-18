@@ -22,20 +22,14 @@ CurlClient::~CurlClient() {
     curl_global_cleanup();
 }
 
+CurlRequest& CurlClient::createHandle() {
+    return _handles.emplace_back();
+}
+
 CurlClientResult<void> CurlClient::sendRequest(const RequestObject& req,
                                                WriteCallBack func) {
     Profile profile {"CurlClient::sendRequest"};
     CurlRequest& curlReq = _handles.emplace_back();
-
-    switch (req.method) {
-        case HTTP_METHOD::POST:
-            if (auto res = curlReq.setPost(req.body); !res) {
-                return res;
-            }
-            break;
-        default:
-            return CurlClientError::result(CurlClientErrorType::UNKNOWN_HTTP_METHOD);
-    }
 
     auto fullUrl = std::string(req.url) + std::string(req.endpoint);
     if (auto res = curlReq.setUrl(fullUrl); !res) {
