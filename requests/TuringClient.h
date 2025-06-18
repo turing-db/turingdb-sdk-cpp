@@ -22,8 +22,6 @@ public:
     explicit TuringClient(std::string& url);
     ~TuringClient() = default;
 
-    void init();
-
     const std::string& getUrl() { return _url; }
     void setUrl(std::string& url) { _url = std::move(url); }
 

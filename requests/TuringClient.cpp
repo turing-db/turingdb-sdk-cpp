@@ -15,10 +15,6 @@ TuringClient::TuringClient(std::string& url)
     _handle(_client.createHandle()),
     _url(std::move(url))
 {
-   init(); 
-}
-
-void TuringClient::init() {
 }
 
 bool TuringClient::listAvailableGraphs(std::vector<std::string>& result) {
