@@ -11,9 +11,10 @@ TuringClientResult<void> turingClient::checkJsonError(const json& jsonMsg,
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    if (jsonMsg.contains("error")) {
+
+    if (const auto jsonIt = jsonMsg.find("error"); jsonIt != jsonMsg.end()) {
         const auto& errorMsg = jsonMsg["error"];
-        if (!errorMsg.is_null()) {
+        if (!(*jsonIt).is_null()) {
             return TuringClientError::result(retErrType, errorMsg.get<std::string>());
         }
     }
@@ -38,26 +39,28 @@ TuringClientResult<void> turingClient::parseJson(char* location,
         return ret;
     }
 
-    if (!res.contains("header")) {
+    const auto headerIt = res.find("header");
+    if (headerIt == res.end()) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    const auto& jsonHeader = res["header"];
-    if (!jsonHeader.contains("column_names") || !jsonHeader.contains("column_types") || !jsonHeader["column_names"].is_array() || !jsonHeader["column_types"].is_array()) {
+    const auto colNamesIt = headerIt->find("column_names");
+    const auto colTypesIt = headerIt->find("column_types");
+    if (colNamesIt == headerIt->end() || colTypesIt == headerIt->end() || !((*colNamesIt).is_array()) || !((*colTypesIt).is_array())) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    if (!res.contains("data")) {
+    const auto dataIt = res.find("data");
+    if (dataIt == res.end()) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    const auto& jsonData = res["data"];
-    if (!jsonData.is_array()) {
+    if (!((*dataIt).is_array())) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    const auto colNames = jsonHeader["column_names"].get<std::vector<std::string>>();
-    const auto colTypes = jsonHeader["column_types"].get<std::vector<std::string>>();
+    const auto colNames = (*colNamesIt).get<std::vector<std::string>>();
+    const auto colTypes = (*colTypesIt).get<std::vector<std::string>>();
     const auto numCols = colNames.size();
 
     if (result.empty()) {
@@ -76,56 +79,21 @@ TuringClientResult<void> turingClient::parseJson(char* location,
         }
     }
 
-    for (const auto& data : jsonData) {
+    const auto addData = [&]<SupportedValueType T>(size_t i, const auto& data) {
+        using ActualType = std::conditional_t<isCustomBool<T>, bool, T>;
+        auto* col = static_cast<Column<T>*>(result[i].get());
+        for (const auto& val : data[i]) {
+            if (!val.is_null()) {
+                col->push_back(val.template get<ActualType>());
+            } else {
+                col->pushNull();
+            }
+        }
+    };
+
+    for (const auto& data : (*dataIt)) {
         for (size_t i = 0; i < numCols; ++i) {
-            switch (result[i].get()->columnType()) {
-                case ColumnType::STRING: {
-                    auto* col = static_cast<Column<std::string>*>(result[i].get());
-                    for (const auto& val : data[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<std::string>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                case ColumnType::BOOL: {
-                    auto* col = static_cast<Column<CustomBool>*>(result[i].get());
-                    for (const auto& val : data[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<bool>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                case ColumnType::UINT: {
-                    auto* col = static_cast<Column<uint64_t>*>(result[i].get());
-                    for (const auto& val : data[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<uint64_t>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                case ColumnType::INT: {
-                    auto* col = static_cast<Column<int64_t>*>(result[i].get());
-                    for (const auto& val : data[i]) {
-                        if (!val.is_null()) {
-                            col->push_back(val.get<int64_t>());
-                        } else {
-                            col->pushNull();
-                        }
-                    }
-                    break;
-                }
-                default:
-                    break;
-            };
+            TypeDispatcher {result[i].get()->columnType()}.execute(addData, i, data);
         }
     }
 

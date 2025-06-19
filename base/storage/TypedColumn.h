@@ -38,8 +38,32 @@ enum ColumnType : uint8_t {
     // Add more types as needed
 };
 
+struct TypeDispatcher {
+    ColumnType _valueType;
+
+    template <typename... Args>
+    auto execute(const auto& executor, Args&&... args) const {
+        switch (_valueType) {
+            case ColumnType::INT:
+                return executor.template operator()<int64_t>(std::forward<Args>(args)...);
+            case ColumnType::UINT:
+                return executor.template operator()<uint64_t>(std::forward<Args>(args)...);
+            case ColumnType::DOUBLE:
+                return executor.template operator()<double>(std::forward<Args>(args)...);
+            case ColumnType::STRING:
+                return executor.template operator()<std::string>(std::forward<Args>(args)...);
+            case ColumnType::BOOL:
+                return executor.template operator()<CustomBool>(std::forward<Args>(args)...);
+        }
+    }
+};
+
+
 template <typename T>
-concept SupportedColumnType = std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string> || std::is_same_v<T, CustomBool>;
+concept SupportedValueType = std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t> || std::is_same_v<T, double> || std::is_same_v<T, std::string> || std::is_same_v<T, CustomBool>;
+
+template <typename T>
+concept isCustomBool = std::is_same_v<T, CustomBool>;
 
 class TypedColumn {
 protected:
@@ -63,7 +87,7 @@ public:
     virtual void setColumnName(std::string& name) = 0;
 };
 
-template <SupportedColumnType ColType>
+template <SupportedValueType ColType>
 class Column : public TypedColumn {
 private:
     std::vector<ColType> _data;
@@ -87,24 +111,25 @@ private:
 public:
     Column() = default;
 
-    explicit Column(std::string colName)
-    :TypedColumn(std::move(colName))
+    explicit Column(const std::string& colName)
+        :TypedColumn(colName)
     {
     }
 
     Column(std::initializer_list<std::optional<ColType>> col)
         requires(!std::same_as<ColType, CustomBool>)
     {
-        _data.reserve(col.size());
-        _mask.reserve(col.size());
+        _data.resize(col.size());
+        _mask.resize(col.size());
 
-        for (const auto& val : col) {
-            if (val.has_value()) {
-                _data.push_back(val.value());
-                _mask.push_back(0);
+        size_t i = 0;
+        for (auto it = col.begin(); it != col.end(); ++it, ++i) {
+            if (it->has_value()) {
+                _data[i] = it->value();
+                _mask[i] = 0;
             } else {
-                _data.push_back(ColType {});
-                _mask.push_back(1);
+                _data[i] = ColType {};
+                _mask[i] = 1;
             }
         }
     }
@@ -112,15 +137,17 @@ public:
     Column(std::initializer_list<std::optional<bool>> col)
         requires std::same_as<ColType, CustomBool>
     {
-        _data.reserve(col.size());
+        _data.resize(col.size());
+        _mask.resize(col.size());
 
-        for (const auto& val : col) {
-            if (val.has_value()) {
-                _data.push_back(CustomBool(val.value()));
-                _mask.push_back(0);
+        size_t i = 0;
+        for (auto it = col.begin(); it != col.end(); ++it, ++i) {
+            if (it->has_value()) {
+                _data[i] = CustomBool(it->value());
+                _mask[i] = 0;
             } else {
-                _data.push_back(CustomBool {});
-                _mask.push_back(1);
+                _data[i] = CustomBool {};
+                _mask[i] = 1;
             }
         }
     }

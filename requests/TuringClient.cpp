@@ -10,10 +10,17 @@
 using namespace turingClient;
 using json = nlohmann::json;
 
-TuringClient::TuringClient(std::string& url)
+TuringClient::TuringClient(const std::string& url)
     : _client(CurlClient::getCurlClient()),
-    _handle(_client.createHandle()),
-    _url(std::move(url))
+      _handle(_client.createHandle()),
+      _url(url)
+{
+}
+
+TuringClient::TuringClient(std::string&& url)
+    : _client(CurlClient::getCurlClient()),
+      _handle(_client.createHandle()),
+      _url(std::move(url))
 {
 }
 

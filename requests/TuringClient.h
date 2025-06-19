@@ -1,21 +1,25 @@
 #pragma once
 
+#include <memory>
+
 #include "CurlClient.h"
 #include "TuringClientResult.h"
 #include "CallBackSignatures.h"
 #include "TypedColumn.h"
-#include <memory>
 
 namespace turingClient {
 
 class TuringClient {
 
 public:
-    explicit TuringClient(std::string& url);
+    explicit TuringClient(const std::string& url);
+    explicit TuringClient(std::string&& url);
     ~TuringClient() = default;
 
     const std::string& getUrl() { return _url; }
-    void setUrl(std::string& url) { _url = std::move(url); }
+
+    void setUrl(const std::string& url) { _url = url; }
+    void setUrl(std::string&& url) { _url = std::move(url); }
 
     TuringClientError& getError() { return _result.error(); }
 
