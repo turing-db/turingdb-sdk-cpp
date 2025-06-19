@@ -55,7 +55,7 @@ public:
 
     CurlClientResult<void> setUrl(const std::string& url);
     CurlClientResult<void> setPost(const std::string& postFields);
-    CurlClientResult<void> setWriteCallBack(WriteCallBack& func);
+    CurlClientResult<void> setWriteCallBack(WriteCallBackPointer func, void* userData);
     CurlClientResult<void> send();
 
 private:

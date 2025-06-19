@@ -1,7 +1,6 @@
 #include "TuringClient.h"
 
 #include "Profiler.h"
-#include "RequestObject.h"
 #include "JsonUtils.h"
 #include "CurlClient.h"
 
@@ -24,38 +23,15 @@ TuringClient::TuringClient(std::string&& url)
 {
 }
 
-bool TuringClient::listAvailableGraphs(std::vector<std::string>& result) {
+bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
     Profile profile {"TuringClient::listLoadedGraphs"};
 
-    WriteCallBack func = [&result, this](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        if (!ptr || !*ptr) {
-            this->_result = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
-            return size * nmemb;
-        }
-
-        json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
-        if (res.is_discarded()) {
-            this->_result = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
-            return size * nmemb;
-        }
-
-        if (this->_result = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS); !this->_result) {
-            return size * nmemb;
-        }
-
-        if (!res.contains("data")) {
-            this->_result = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
-            return size * nmemb;
-        }
-
-        auto jsonVec = res["data"].get<std::vector<std::string>>();
-        result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
-
-        return size * nmemb;
-    };
-
-    _handle.setUrl(_url + "/list_avail_graphs");
-    if (auto res = _handle.setWriteCallBack(func); !res) {
+    auto vals = std::make_unique<callbackReturnValues>(_result, ret);
+    if (auto res = _handle.setUrl(_url + "/list_avail_graphs"); !res) {
+        _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
+        return false;
+    }
+    if (auto res = _handle.setWriteCallBack(listLoadedGraphsCallBack, static_cast<void*>(vals.get())); !res) {
         this->_result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
         return false;
     }
@@ -72,37 +48,16 @@ bool TuringClient::listAvailableGraphs(std::vector<std::string>& result) {
     return _result.has_value();
 }
 
-bool TuringClient::listLoadedGraphs(std::vector<std::string>& result) {
+bool TuringClient::listLoadedGraphs(std::vector<std::string>& ret) {
     Profile profile {"TuringClient::listLoadedGraphs"};
 
-    WriteCallBack func = [&result, this](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        if (!ptr || !*ptr) {
-            this->_result = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
-            return size * nmemb;
-        }
 
-        json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
-        if (res.is_discarded()) {
-            this->_result = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
-            return size * nmemb;
-        }
-
-        if (this->_result = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS); !this->_result) {
-            return size * nmemb;
-        }
-
-        if (!res.contains("data")) {
-            this->_result = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
-            return size * nmemb;
-        }
-        auto jsonVec = res["data"][0][0].get<std::vector<std::string>>();
-        result.insert(result.begin(), jsonVec.begin(), jsonVec.end());
-
-        return size * nmemb;
-    };
-
-    _handle.setUrl(_url + "/list_loaded_graphs");
-    if (auto res = _handle.setWriteCallBack(func); !res) {
+    auto vals = std::make_unique<callbackReturnValues>(_result, ret);
+    if (auto res = _handle.setUrl(_url + "/list_loaded_graphs"); !res) {
+        _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
+        return false;
+    }
+    if (auto res = _handle.setWriteCallBack(listLoadedGraphsCallBack, static_cast<void*>(vals.get())); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
         return false;
     }
@@ -122,24 +77,7 @@ bool TuringClient::listLoadedGraphs(std::vector<std::string>& result) {
 bool TuringClient::loadGraph(const std::string& graph) {
     Profile profile {"TuringClient::loadGraph"};
 
-    WriteCallBack func = [this](char* ptr, size_t size, size_t nmemb, void* userdata) {
-        if (!ptr || !*ptr) {
-            this->_result = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
-            return size * nmemb;
-        }
-
-        json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
-        if (res.is_discarded()) {
-            this->_result = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
-            return size * nmemb;
-        }
-
-        this->_result = checkJsonError(res, TuringClientErrorType::CANNOT_LOAD_GRAPH);
-
-        return size * nmemb;
-    };
-
-    if (auto res = _handle.setWriteCallBack(func); !res) {
+    if (auto res = _handle.setWriteCallBack(loadGraphCallBack, static_cast<void*>(&_result)); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
         return false;
     }
@@ -161,7 +99,7 @@ bool TuringClient::loadGraph(const std::string& graph) {
 
 bool TuringClient::query(const std::string& query,
                          const std::string& graph,
-                         std::vector<std::unique_ptr<TypedColumn>>& result) {
+                         std::vector<std::unique_ptr<TypedColumn>>& ret) {
     Profile profile {"TuringClient::query"};
 
     _buffer.clear();
@@ -178,7 +116,7 @@ bool TuringClient::query(const std::string& query,
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
         return false;
     }
-    if (auto res = _handle.setWriteCallBack(func); !res) {
+    if (auto res = _handle.setWriteCallBack(queryCallBack, static_cast<void*>(&_buffer)); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
         return false;
     }
@@ -192,7 +130,86 @@ bool TuringClient::query(const std::string& query,
     }
 
     _buffer.push_back('\0');
-    _result = parseJson(_buffer.data(), result);
+    _result = parseJson(_buffer.data(), ret);
 
     return _result.has_value();
+}
+
+size_t TuringClient::listAvailableGraphsCallBack(char* ptr, size_t size, size_t nmemb, void* userdata) {
+    auto* resultVals = static_cast<callbackReturnValues*>(userdata);
+    if (!ptr || !*ptr) {
+        resultVals->errorResult = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+        return size * nmemb;
+    }
+
+    json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
+    if (res.is_discarded()) {
+        resultVals->errorResult = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
+        return size * nmemb;
+    }
+
+    if (resultVals->errorResult = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS); !resultVals->errorResult) {
+        return size * nmemb;
+    }
+
+    if (!res.contains("data")) {
+        resultVals->errorResult = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+        return size * nmemb;
+    }
+
+    auto jsonVec = res["data"].get<std::vector<std::string>>();
+    resultVals->stringResult.insert(resultVals->stringResult.begin(), jsonVec.begin(), jsonVec.end());
+
+    return size * nmemb;
+}
+size_t TuringClient::listLoadedGraphsCallBack(char* ptr, size_t size, size_t nmemb, void* userdata) {
+    auto* resultVals = static_cast<callbackReturnValues*>(userdata);
+    if (!ptr || !*ptr) {
+        resultVals->errorResult = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+        return size * nmemb;
+    }
+
+    json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
+    if (res.is_discarded()) {
+        resultVals->errorResult = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
+        return size * nmemb;
+    }
+
+    if (resultVals->errorResult = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS); !resultVals->errorResult) {
+        return size * nmemb;
+    }
+
+    if (!res.contains("data")) {
+        resultVals->errorResult = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+        return size * nmemb;
+    }
+    auto jsonVec = res["data"][0][0].get<std::vector<std::string>>();
+    resultVals->stringResult.insert(resultVals->stringResult.begin(), jsonVec.begin(), jsonVec.end());
+
+    return size * nmemb;
+}
+size_t TuringClient::loadGraphCallBack(char* ptr, size_t size, size_t nmemb, void* userdata) {
+    auto* errorResult = static_cast<TuringClientResult<void>*>(userdata);
+    if (!ptr || !*ptr) {
+        *errorResult = TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+        return size * nmemb;
+    }
+
+    json res = json::parse(ptr, ptr + size * nmemb, nullptr, false);
+    if (res.is_discarded()) {
+        *errorResult = TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
+        return size * nmemb;
+    }
+
+    *errorResult = checkJsonError(res, TuringClientErrorType::CANNOT_LOAD_GRAPH);
+
+    return size * nmemb;
+}
+size_t TuringClient::queryCallBack(char* ptr, size_t size, size_t nmemb, void* userdata) {
+    auto* buffer = static_cast<std::vector<char>*>(userdata);
+    size_t oldsize = buffer->size();
+    buffer->resize(oldsize + size * nmemb);
+    memcpy(buffer->data() + oldsize, ptr, size * nmemb);
+
+    return size * nmemb;
 }

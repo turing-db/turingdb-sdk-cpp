@@ -1,16 +1,10 @@
 #include "CurlRequest.h"
 
 #include <curl/curl.h>
-#include <iostream>
 
 #include "Profiler.h"
 
 using namespace turingClient;
-
-static size_t staticCallBack(char* ptr, size_t size, size_t nmemb, void* userdata) {
-    auto* self = static_cast<CurlRequest*>(userdata);
-    return self->callBackFn(ptr, size, nmemb, userdata);
-}
 
 bool CurlRequest::init() {
     if (auto res = curl_easy_setopt(_handle, CURLOPT_TCP_NODELAY, 1L); res != CURLE_OK) {
@@ -71,14 +65,13 @@ CurlClientResult<void> CurlRequest::setPost(const std::string& postFields) {
     return {};
 }
 
-CurlClientResult<void> CurlRequest::setWriteCallBack(WriteCallBack& func) {
+CurlClientResult<void> CurlRequest::setWriteCallBack(WriteCallBackPointer func, void* userData) {
     Profile profile {"CurlRequest::setWriteCallBack"};
 
-    callBackFn = std::move(func);
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, staticCallBack); res != CURLE_OK) {
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, func); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_WRITE_CALLBACK, res);
     }
-    if (auto res = curl_easy_setopt(_handle, CURLOPT_WRITEDATA, this); res != CURLE_OK) {
+    if (auto res = curl_easy_setopt(_handle, CURLOPT_WRITEDATA, userData); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_WRITE_CALLBACK, res);
     }
 
