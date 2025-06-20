@@ -11,7 +11,6 @@ TuringClientResult<void> turingClient::checkJsonError(const json& jsonMsg,
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-
     if (const auto jsonIt = jsonMsg.find("error"); jsonIt != jsonMsg.end()) {
         const auto& errorMsg = jsonMsg["error"];
         if (!(*jsonIt).is_null()) {
@@ -46,7 +45,10 @@ TuringClientResult<void> turingClient::parseJson(char* location,
 
     const auto colNamesIt = headerIt->find("column_names");
     const auto colTypesIt = headerIt->find("column_types");
-    if (colNamesIt == headerIt->end() || colTypesIt == headerIt->end() || !((*colNamesIt).is_array()) || !((*colTypesIt).is_array())) {
+    if (colNamesIt == headerIt->end()
+        || colTypesIt == headerIt->end()
+        || !((*colNamesIt).is_array())
+        || !((*colTypesIt).is_array())) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
