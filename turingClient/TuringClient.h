@@ -25,7 +25,7 @@ public:
     void setUrl(const std::string& url) { _url = url; }
     void setUrl(std::string&& url) { _url = std::move(url); }
 
-    void setBearerToken(const std::string& token);
+    bool setBearerToken(const std::string& token);
     void removeBearerToken();
 
     TuringClientError& getError() { return _result.error(); }

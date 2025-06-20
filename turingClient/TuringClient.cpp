@@ -23,9 +23,14 @@ TuringClient::TuringClient(std::string&& url)
 {
 }
 
-void TuringClient::setBearerToken(const std::string& token) {
+bool TuringClient::setBearerToken(const std::string& token) {
     Profile profile {"TuringClient::setBearerToken"};
-    _handle.setBearerToken(token);
+    if (auto res = _handle.setBearerToken(token); !res) {
+        _result = TuringClientError::result(TuringClientErrorType::CANNOT_SET_BEARER_TOKEN, res.error());
+        return false;
+    }
+
+    return true;
 }
 
 void TuringClient::removeBearerToken() {
