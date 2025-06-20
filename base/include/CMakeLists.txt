@@ -1,0 +1,2 @@
+add_library(turing_client_cpp_common_headers INTERFACE)
+target_include_directories(turing_client_cpp_common_headers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} )

@@ -1,0 +1,4 @@
+add_turing_test(test_requests_turingrequests TuringRequestTest.cpp)
+
+target_link_libraries(test_requests_turingrequests
+    PRIVATE turing_client_cpp_s)
