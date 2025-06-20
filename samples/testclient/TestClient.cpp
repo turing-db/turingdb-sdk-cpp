@@ -28,8 +28,9 @@ void printTypedColumns(std::vector<std::unique_ptr<TypedColumn>>& cols) {
 }
 
 int main() {
-    std::string url = "http://127.0.0.1:6666";
+    std::string url = "http://127.0.0.1:8080";
     turingClient::TuringClient request(url);
+    request.setBearerToken("vwxy345efg678hij901klm234nop567pqr890stu123vwx456");
     std::string graph = "simpledb";
     std::string graphFake = "simplestdb";
 

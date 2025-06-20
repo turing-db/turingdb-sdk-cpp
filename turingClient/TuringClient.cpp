@@ -23,6 +23,16 @@ TuringClient::TuringClient(std::string&& url)
 {
 }
 
+void TuringClient::setBearerToken(const std::string& token) {
+    Profile profile {"TuringClient::setBearerToken"};
+    _handle.setBearerToken(token);
+}
+
+void TuringClient::removeBearerToken() {
+    Profile profile {"TuringClient::setBearerToken"};
+    _handle.clearHeaders();
+}
+
 bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
     Profile profile {"TuringClient::listLoadedGraphs"};
 
@@ -31,7 +41,7 @@ bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
         return false;
     }
-    if (auto res = _handle.setWriteCallBack(listLoadedGraphsCallBack, static_cast<void*>(vals.get())); !res) {
+    if (auto res = _handle.setWriteCallBack(listAvailableGraphsCallBack, static_cast<void*>(vals.get())); !res) {
         this->_result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
         return false;
     }

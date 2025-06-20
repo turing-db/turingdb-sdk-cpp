@@ -7,12 +7,12 @@ std::string CurlClientError::fmtMessage() const {
     std::string curlClientErrorString = fmt::format("Curl Client Error : {}", CurlClientErrorTypeDescription::value(_type));
 
     if (_libCurlError) {
-        return fmt::format("{}, Curl Error: {}", curlClientErrorString, curl_easy_strerror(static_cast<CURLcode>(_libCurlError)));
+        curlClientErrorString += fmt::format(", Curl Error: {}", curl_easy_strerror(static_cast<CURLcode>(_libCurlError)));
     }
 
     if (_httpErrorCode) {
-        return fmt::format("{}, HTTP Error Code:{}", curlClientErrorString, _httpErrorCode);
+        curlClientErrorString += fmt::format(", HTTP Error Code:{}", _httpErrorCode);
     }
 
-    return std::string(curlClientErrorString);
+    return curlClientErrorString;
 }
