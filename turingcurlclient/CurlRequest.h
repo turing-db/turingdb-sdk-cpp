@@ -29,6 +29,8 @@ public:
     ~CurlRequest() {
         if (_handle) {
             curl_easy_cleanup(_handle);
+        }
+        if (_headers) {
             curl_slist_free_all(_headers);
         }
     }
@@ -72,8 +74,7 @@ public:
     CurlClientResult<void> send();
 
 private:
-    CURL* _handle;
+    CURL* _handle {nullptr};
     struct curl_slist* _headers {nullptr};
 };
-
 }

@@ -5,8 +5,9 @@
 
 using namespace turingClient;
 
-TuringClientResult<void> turingClient::checkJsonError(const json& jsonMsg,
-                                                      const TuringClientErrorType& retErrType) {
+TuringClientResult<void>
+turingClient::checkJsonError(const json& jsonMsg,
+                             const TuringClientErrorType& retErrType) {
     if ((!jsonMsg.is_object())) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
@@ -20,8 +21,9 @@ TuringClientResult<void> turingClient::checkJsonError(const json& jsonMsg,
     return {};
 }
 
-TuringClientResult<void> turingClient::parseJson(char* location,
-                                                 std::vector<std::unique_ptr<TypedColumn>>& result) {
+TuringClientResult<void>
+turingClient::parseJson(char* location,
+                        std::vector<std::unique_ptr<TypedColumn>>& result) {
     Profile profile {"TuringClient::parseJson"};
 
     if (!location || !*location) {

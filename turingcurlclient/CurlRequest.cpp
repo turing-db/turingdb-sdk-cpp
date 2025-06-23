@@ -57,12 +57,12 @@ void CurlRequest::clearHeaders() {
     curl_slist_free_all(_headers);
     _headers = NULL;
 }
+
 CurlClientResult<void> CurlRequest::setBearerToken(const std::string& bearerToken) {
     Profile profile {"CurlRequest::setBearerToken"};
 
     // For now since these are our only headers let's just reset, but as we get more complex we
-    // need a better / more efficient strategy.
-    //
+    // may need a more efficient strategy.
     clearHeaders();
 
     if (auto res = addHeader("Content-Type: text/plain"); !res) {
