@@ -44,7 +44,7 @@ private:
     static size_t queryCallBack(char* ptr, size_t size, size_t nmemb, void* userdata);
 
     CurlClient& _client;
-    CurlRequest& _handle;
+    CurlRequest* _handle {nullptr};
 
     std::string _url;
     std::vector<char> _buffer;

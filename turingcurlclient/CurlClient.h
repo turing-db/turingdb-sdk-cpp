@@ -8,9 +8,9 @@ namespace turingClient {
 
 class CurlClient {
 public:
-    CurlRequest& createHandle();
+    CurlRequest* createHandle();
 
-    std::vector<CurlRequest>& getHandles() { return _handles; }
+    std::vector<std::unique_ptr<CurlRequest>>& getHandles() { return _handles; }
 
     static CurlClient& getCurlClient() {
         static CurlClient client;
@@ -25,6 +25,6 @@ private:
 
     void init();
 
-    std::vector<CurlRequest> _handles;
+    std::vector<std::unique_ptr<CurlRequest>> _handles;
 };
 }
