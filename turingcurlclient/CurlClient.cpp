@@ -23,5 +23,5 @@ CurlClient::~CurlClient() {
 }
 
 CurlRequest* CurlClient::createHandle() {
-    return _handles.emplace_back().get();
+    return _handles.emplace_back(std::make_unique<CurlRequest>()).get();
 }
