@@ -23,27 +23,42 @@ TuringClient::TuringClient(std::string&& url)
 {
 }
 
+bool TuringClient::setBearerToken(const std::string& token) {
+    Profile profile {"TuringClient::setBearerToken"};
+    if (auto res = _handle->setBearerToken(token); !res) {
+        _result = TuringClientError::result(TuringClientErrorType::CANNOT_SET_BEARER_TOKEN, res.error());
+        return false;
+    }
+
+    return true;
+}
+
+void TuringClient::removeBearerToken() {
+    Profile profile {"TuringClient::setBearerToken"};
+    _handle->clearHeaders();
+}
+
 bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
     Profile profile {"TuringClient::listLoadedGraphs"};
 
     auto vals = std::make_unique<callbackReturnValues>(_result, ret);
-    if (auto res = _handle.setUrl(_url + "/list_avail_graphs"); !res) {
+    if (auto res = _handle->setUrl(_url + "/list_avail_graphs"); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
         return false;
     }
-    if (auto res = _handle.setWriteCallBack(listLoadedGraphsCallBack, static_cast<void*>(vals.get())); !res) {
+    if (auto res = _handle->setWriteCallBack(listAvailableGraphsCallBack,
+                                             static_cast<void*>(vals.get())); !res) {
         this->_result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
         return false;
     }
-    if (auto res = _handle.setPost(""); !res) {
+    if (auto res = _handle->setPost(""); !res) {
         this->_result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
         return false;
     }
-    if (auto res = _handle.send(); !res) {
+    if (auto res = _handle->send(); !res) {
         this->_result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
         return false;
     }
-
 
     return _result.has_value();
 }
@@ -51,25 +66,24 @@ bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
 bool TuringClient::listLoadedGraphs(std::vector<std::string>& ret) {
     Profile profile {"TuringClient::listLoadedGraphs"};
 
-
     auto vals = std::make_unique<callbackReturnValues>(_result, ret);
-    if (auto res = _handle.setUrl(_url + "/list_loaded_graphs"); !res) {
+    if (auto res = _handle->setUrl(_url + "/list_loaded_graphs"); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
         return false;
     }
-    if (auto res = _handle.setWriteCallBack(listLoadedGraphsCallBack, static_cast<void*>(vals.get())); !res) {
+    if (auto res = _handle->setWriteCallBack(listLoadedGraphsCallBack,
+                                             static_cast<void*>(vals.get())); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
         return false;
     }
-    if (auto res = _handle.setPost(""); !res) {
+    if (auto res = _handle->setPost(""); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
         return false;
     }
-    if (auto res = _handle.send(); !res) {
+    if (auto res = _handle->send(); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
         return false;
     }
-
 
     return _result.has_value();
 }
@@ -77,19 +91,20 @@ bool TuringClient::listLoadedGraphs(std::vector<std::string>& ret) {
 bool TuringClient::loadGraph(const std::string& graph) {
     Profile profile {"TuringClient::loadGraph"};
 
-    if (auto res = _handle.setWriteCallBack(loadGraphCallBack, static_cast<void*>(&_result)); !res) {
+    if (auto res = _handle->setWriteCallBack(loadGraphCallBack,
+                                             static_cast<void*>(&_result)); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
         return false;
     }
-    if (auto res = _handle.setUrl(_url + "/load_graph?graph=" + graph); !res) {
+    if (auto res = _handle->setUrl(_url + "/load_graph?graph=" + graph); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
         return false;
     }
-    if (auto res = _handle.setPost(""); !res) {
+    if (auto res = _handle->setPost(""); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
         return false;
     }
-    if (auto res = _handle.send(); !res) {
+    if (auto res = _handle->send(); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LOAD_GRAPH, res.error());
         return false;
     }
@@ -112,19 +127,19 @@ bool TuringClient::query(const std::string& query,
         return size * nmemb;
     };
 
-    if (auto res = _handle.setUrl(_url + "/query?graph=" + graph); !res) {
+    if (auto res = _handle->setUrl(_url + "/query?graph=" + graph); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
         return false;
     }
-    if (auto res = _handle.setWriteCallBack(queryCallBack, static_cast<void*>(&_buffer)); !res) {
+    if (auto res = _handle->setWriteCallBack(queryCallBack, static_cast<void*>(&_buffer)); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
         return false;
     }
-    if (auto res = _handle.setPost(query); !res) {
+    if (auto res = _handle->setPost(query); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
         return false;
     }
-    if (auto res = _handle.send(); !res) {
+    if (auto res = _handle->send(); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
         return false;
     }
@@ -148,7 +163,8 @@ size_t TuringClient::listAvailableGraphsCallBack(char* ptr, size_t size, size_t 
         return size * nmemb;
     }
 
-    if (resultVals->errorResult = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS); !resultVals->errorResult) {
+    if (resultVals->errorResult = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS);
+        !resultVals->errorResult) {
         return size * nmemb;
     }
 
@@ -175,7 +191,8 @@ size_t TuringClient::listLoadedGraphsCallBack(char* ptr, size_t size, size_t nme
         return size * nmemb;
     }
 
-    if (resultVals->errorResult = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS); !resultVals->errorResult) {
+    if (resultVals->errorResult = checkJsonError(res, TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS);
+        !resultVals->errorResult) {
         return size * nmemb;
     }
 

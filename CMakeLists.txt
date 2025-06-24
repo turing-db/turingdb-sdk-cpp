@@ -104,7 +104,7 @@ if(NOT EXCLUDE_SAMPLES)
 add_subdirectory(samples)
 endif()
 add_subdirectory(turingcurlclient)
-add_subdirectory(requests)
+add_subdirectory(turingClient)
 add_subdirectory(common)
 add_subdirectory(test)
 

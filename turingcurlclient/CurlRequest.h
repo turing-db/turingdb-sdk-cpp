@@ -30,6 +30,9 @@ public:
         if (_handle) {
             curl_easy_cleanup(_handle);
         }
+        if (_headers) {
+            curl_slist_free_all(_headers);
+        }
     }
 
     CurlRequest(CurlRequest&) = delete;
@@ -37,8 +40,11 @@ public:
 
     CurlRequest(CurlRequest&& other) noexcept
         :callBackFn(std::move(other.callBackFn)), 
-        _handle(other._handle) {
+        _handle(other._handle),
+        _headers(other._headers)
+    {
         other._handle = nullptr;
+        other._headers = nullptr;
     }
 
     CurlRequest& operator=(CurlRequest&& other) noexcept {
@@ -46,20 +52,29 @@ public:
             if (_handle) {
                 curl_easy_cleanup(_handle);
             }
+            if (_headers) {
+                curl_slist_free_all(_headers);
+            }
             _handle = other._handle;
+            _headers = other._headers;
             callBackFn = std::move(other.callBackFn);
+
             other._handle = nullptr;
+            other._headers = nullptr;
         }
         return *this;
     };
 
+    CurlClientResult<void> addHeader(const std::string& header);
+    void clearHeaders();
     CurlClientResult<void> setUrl(const std::string& url);
     CurlClientResult<void> setPost(const std::string& postFields);
     CurlClientResult<void> setWriteCallBack(WriteCallBackPointer func, void* userData);
+    CurlClientResult<void> setBearerToken(const std::string& bearerToken);
     CurlClientResult<void> send();
 
 private:
-    CURL* _handle;
+    CURL* _handle {nullptr};
+    struct curl_slist* _headers {nullptr};
 };
-
 }

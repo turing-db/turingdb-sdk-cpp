@@ -25,6 +25,9 @@ public:
     void setUrl(const std::string& url) { _url = url; }
     void setUrl(std::string&& url) { _url = std::move(url); }
 
+    bool setBearerToken(const std::string& token);
+    void removeBearerToken();
+
     TuringClientError& getError() { return _result.error(); }
 
     bool listLoadedGraphs(std::vector<std::string>& ret);
@@ -41,7 +44,7 @@ private:
     static size_t queryCallBack(char* ptr, size_t size, size_t nmemb, void* userdata);
 
     CurlClient& _client;
-    CurlRequest& _handle;
+    CurlRequest* _handle {nullptr};
 
     std::string _url;
     std::vector<char> _buffer;

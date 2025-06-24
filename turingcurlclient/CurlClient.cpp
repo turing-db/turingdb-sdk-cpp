@@ -22,6 +22,6 @@ CurlClient::~CurlClient() {
     curl_global_cleanup();
 }
 
-CurlRequest& CurlClient::createHandle() {
-    return _handles.emplace_back();
+CurlRequest* CurlClient::createHandle() {
+    return _handles.emplace_back(std::make_unique<CurlRequest>()).get();
 }

@@ -12,7 +12,9 @@ class Path;
 enum class CurlClientErrorType : uint8_t {
     UNKNOWN = 0,
     CANNOT_SET_POST_REQUEST,
-    CANNOT_SET_URL_REQUEST,
+    CANNOT_SET_HEADERS,
+    CANNOT_SET_URL,
+    CANNOT_SET_BEARER_TOKEN,
     CANNOT_SET_WRITE_CALLBACK,
     CANNOT_SEND_REQUEST,
     HTTP_ERROR,
@@ -23,7 +25,9 @@ enum class CurlClientErrorType : uint8_t {
 using CurlClientErrorTypeDescription = EnumToString<CurlClientErrorType>::Create<
     EnumStringPair<CurlClientErrorType::UNKNOWN, "Unknown">,
     EnumStringPair<CurlClientErrorType::CANNOT_SET_POST_REQUEST, "Could not set the curl request to POST">,
-    EnumStringPair<CurlClientErrorType::CANNOT_SET_URL_REQUEST, "Could not set the destination URL on the request">,
+    EnumStringPair<CurlClientErrorType::CANNOT_SET_HEADERS, "Could not set the HTTP headeres">,
+    EnumStringPair<CurlClientErrorType::CANNOT_SET_URL, "Could not set the destination URL on the request">,
+    EnumStringPair<CurlClientErrorType::CANNOT_SET_BEARER_TOKEN, "Could not set the beaerer token">,
     EnumStringPair<CurlClientErrorType::CANNOT_SET_WRITE_CALLBACK, "Could not set the write callback function">,
     EnumStringPair<CurlClientErrorType::CANNOT_SEND_REQUEST, "Could not send the CURL request">,
     EnumStringPair<CurlClientErrorType::HTTP_ERROR, "Received HTTP Error Code">,
@@ -32,12 +36,18 @@ using CurlClientErrorTypeDescription = EnumToString<CurlClientErrorType>::Create
 class CurlClientError {
 public:
     CurlClientError() = default;
+    CurlClientError(CurlClientErrorType type) 
+        : _type(type)
+    {
+    }
+
     CurlClientError(CurlClientErrorType type,
                     const int libCurlError)
         : _type(type),
           _libCurlError(libCurlError)
     {
     }
+
     CurlClientError(CurlClientErrorType type,
                     const long httpErrorCode)
         : _type(type),
@@ -50,9 +60,20 @@ public:
     [[nodiscard]] std::string fmtMessage() const;
 
     template <typename... T>
+    static BadResult<CurlClientError> result(CurlClientErrorType type) {
+        return BadResult<CurlClientError>(CurlClientError(type));
+    }
+
+    template <typename... T>
     static BadResult<CurlClientError> result(CurlClientErrorType type,
-                                             int libCurlError = 0) {
+                                             int libCurlError) {
         return BadResult<CurlClientError>(CurlClientError(type, libCurlError));
+    }
+
+    template <typename... T>
+    static BadResult<CurlClientError> result(CurlClientErrorType type,
+                                             long httpErrorCode) {
+        return BadResult<CurlClientError>(CurlClientError(type, httpErrorCode));
     }
 
 private:
