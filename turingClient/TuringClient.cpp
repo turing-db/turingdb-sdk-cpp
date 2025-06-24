@@ -66,7 +66,6 @@ bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
 bool TuringClient::listLoadedGraphs(std::vector<std::string>& ret) {
     Profile profile {"TuringClient::listLoadedGraphs"};
 
-
     auto vals = std::make_unique<callbackReturnValues>(_result, ret);
     if (auto res = _handle->setUrl(_url + "/list_loaded_graphs"); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_LOADED_GRAPHS, res.error());
