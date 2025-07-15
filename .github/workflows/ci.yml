@@ -13,8 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Pull submodules
-      run: ./pull.sh
+      with:
+            # Fetch submodules using the built-in token over HTTPS
+            submodules: true
+            # Ensure credentials are set for submodule fetches
+            persist-credentials: true
     - name: Configure cmake
       shell: bash
       run: mkdir -p ${{ github.workspace }}/build && cd ${{ github.workspace }}/build && cmake ..
