@@ -15,9 +15,10 @@ jobs:
     - uses: actions/checkout@v4
       with:
             # Fetch submodules using the built-in token over HTTPS
-            submodules: true
+            submodules: recursive
             # Ensure credentials are set for submodule fetches
             persist-credentials: true
+    - name: Pull recry
     - name: Install dependencies
       run: ./dependencies.sh
     - name: Configure cmake
