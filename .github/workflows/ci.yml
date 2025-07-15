@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Pull submodules
+      run: ./pull.sh
+    - name: Configure cmake
+      shell: bash
+      run: mkdir -p ${{ github.workspace }}/build && cd ${{ github.workspace }}/build && cmake ..
+    - name: Build
+      shell: bash
+      run: cd ${{ github.workspace }}/build && make
