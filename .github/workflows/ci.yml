@@ -18,6 +18,8 @@ jobs:
             submodules: true
             # Ensure credentials are set for submodule fetches
             persist-credentials: true
+    - name: Install dependencies
+      run: ./dependencies.sh
     - name: Configure cmake
       shell: bash
       run: mkdir -p ${{ github.workspace }}/build && cd ${{ github.workspace }}/build && cmake ..
