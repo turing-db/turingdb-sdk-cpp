@@ -96,9 +96,6 @@ find_package(Threads REQUIRED)
 # threads
 find_package(CURL REQUIRED)
 
-# Python
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-
 add_subdirectory(base)
 if(NOT EXCLUDE_SAMPLES)
 add_subdirectory(samples)
