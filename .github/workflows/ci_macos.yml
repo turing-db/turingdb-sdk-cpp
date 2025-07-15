@@ -1,0 +1,28 @@
+name: CI macos
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: macos-15-large
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+            # Fetch submodules using the built-in token over HTTPS
+            submodules: recursive
+            # Ensure credentials are set for submodule fetches
+            persist-credentials: true
+    - name: Install dependencies
+      run: ./dependencies.sh
+    - name: Configure cmake
+      shell: bash
+      run: mkdir -p ${{ github.workspace }}/build && cd ${{ github.workspace }}/build && cmake ..
+    - name: Build
+      shell: bash
+      run: cd ${{ github.workspace }}/build && make
