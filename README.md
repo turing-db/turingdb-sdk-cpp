@@ -1,6 +1,6 @@
 # TuringDB C++ SDK
 
-[![CI](https://github.com/turing-db/turingdb-sdk-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/turing-db/turingdb-sdk-cpp/actions/workflows/ci.yml)
+[![CI Ubuntu](https://github.com/turing-db/turingdb-sdk-cpp/actions/workflows/ci_ubuntu.yml/badge.svg)](https://github.com/turing-db/turingdb-sdk-cpp/actions/workflows/ci_ubuntu.yml)
 
 ## Build
 
