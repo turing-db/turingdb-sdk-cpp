@@ -18,7 +18,6 @@ jobs:
             submodules: recursive
             # Ensure credentials are set for submodule fetches
             persist-credentials: true
-    - name: Pull recry
     - name: Install dependencies
       run: ./dependencies.sh
     - name: Configure cmake
