@@ -39,7 +39,7 @@ bool CurlRequest::init() {
     return true;
 }
 
-CurlClientResult<void> CurlRequest::addHeader(const std::string& header) {
+CurlClientResult<void> CurlRequest::addToSlist(const std::string& header) {
     Profile profile {"CurlRequest::addHeader"};
 
     struct curl_slist* temp = curl_slist_append(_headers, header.c_str());
@@ -54,27 +54,81 @@ CurlClientResult<void> CurlRequest::addHeader(const std::string& header) {
 }
 
 void CurlRequest::clearHeaders() {
+    Profile profile {"CurlRequest::clearHeaders"};
     curl_slist_free_all(_headers);
     _headers = NULL;
+}
+
+CurlClientResult<void> CurlRequest::clearHeader(const std::string& headerKey) {
+    Profile profile {"CurlRequest::clearHeader"};
+    _headerMap.erase(headerKey);
+    return fillAllHeaders();
+}
+
+CurlClientResult<void> CurlRequest::fillAllHeaders() {
+    Profile profile {"CurlRequest::fillAllHeaders"};
+
+    clearHeaders();
+    for (const auto& [key, value] : _headerMap) {
+        if (auto res = addToSlist(key + ": " + value); !res) {
+            return res;
+        }
+    }
+
+    curl_easy_setopt(_handle, CURLOPT_HTTPHEADER, _headers);
+    return {};
 }
 
 CurlClientResult<void> CurlRequest::setBearerToken(const std::string& bearerToken) {
     Profile profile {"CurlRequest::setBearerToken"};
 
-    // For now since these are our only headers let's just reset, but as we get more complex we
-    // may need a more efficient strategy.
-    clearHeaders();
-
-    if (auto res = addHeader("Content-Type: text/plain"); !res) {
-        return res;
+    if (_headerMap.find("Authorization") != _headerMap.end()) {
+        _headerMap["Authorization"] = "Bearer " + bearerToken;
+        return fillAllHeaders();
     }
 
-    if (auto res = addHeader("Authorization: Bearer " + bearerToken); !res) {
+    _headerMap["Authorization"] = "Bearer " + bearerToken;
+
+    if (auto res = addToSlist("Authorization: " + _headerMap["Authorization"]); !res) {
         return res;
     }
 
     curl_easy_setopt(_handle, CURLOPT_HTTPHEADER, _headers);
+    return {};
+}
 
+CurlClientResult<void> CurlRequest::addHeader(const std::string& headerKey,
+                                              const std::string& headerValue) {
+    Profile profile {"CurlRequest::addHeader"};
+    if (_headerMap.find(headerKey) != _headerMap.end()) {
+        _headerMap[headerKey] = headerValue;
+        return fillAllHeaders();
+    }
+
+    _headerMap[headerKey] = headerValue;
+
+    if (auto res = addToSlist(headerKey + ": " + headerValue); !res) {
+        return res;
+    }
+
+    curl_easy_setopt(_handle, CURLOPT_HTTPHEADER, _headers);
+    return {};
+}
+CurlClientResult<void> CurlRequest::setInstanceId(const std::string& instanceId) {
+    Profile profile {"CurlRequest::setBearerToken"};
+
+    if (_headerMap.find("Turing-Instance-Id") != _headerMap.end()) {
+        _headerMap["Turing-Instance-Id"] = instanceId;
+        return fillAllHeaders();
+    }
+
+    _headerMap["Turing-Instance-Id"] = instanceId;
+
+    if (auto res = addToSlist("Turing-Instance-Id: " + _headerMap["Turing-Instance-Id"]); !res) {
+        return res;
+    }
+
+    curl_easy_setopt(_handle, CURLOPT_HTTPHEADER, _headers);
     return {};
 }
 

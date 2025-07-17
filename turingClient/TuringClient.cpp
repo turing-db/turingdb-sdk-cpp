@@ -25,7 +25,7 @@ TuringClient::TuringClient(std::string&& url)
 
 bool TuringClient::setBearerToken(const std::string& token) {
     Profile profile {"TuringClient::setBearerToken"};
-    if (auto res = _handle->setBearerToken(token); !res) {
+    if (auto res = _handle->addHeader("Authorization", "Bearer " + token); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_SET_BEARER_TOKEN, res.error());
         return false;
     }
@@ -34,8 +34,23 @@ bool TuringClient::setBearerToken(const std::string& token) {
 }
 
 void TuringClient::removeBearerToken() {
-    Profile profile {"TuringClient::setBearerToken"};
-    _handle->clearHeaders();
+    Profile profile {"TuringClient::removeBearerToken"};
+    _handle->clearHeader("Authorization");
+}
+
+bool TuringClient::setInstanceId(const std::string& instanceId) {
+    Profile profile {"TuringClient::setInstanceId"};
+    if (auto res = _handle->addHeader("Turing-Instance-Id", instanceId); !res) {
+        _result = TuringClientError::result(TuringClientErrorType::CANNOT_SET_BEARER_TOKEN, res.error());
+        return false;
+    }
+
+    return true;
+}
+
+void TuringClient::removeInstanceId() {
+    Profile profile {"TuringClient::removeInstanceId"};
+    _handle->clearHeader("Turing-Instance-Id");
 }
 
 bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {

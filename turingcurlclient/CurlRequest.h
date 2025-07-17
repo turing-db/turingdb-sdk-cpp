@@ -65,16 +65,21 @@ public:
         return *this;
     };
 
-    CurlClientResult<void> addHeader(const std::string& header);
+    CurlClientResult<void> addToSlist(const std::string& header);
     void clearHeaders();
+    CurlClientResult<void> clearHeader(const std::string& headerKey);
+    CurlClientResult<void> fillAllHeaders();
     CurlClientResult<void> setUrl(const std::string& url);
     CurlClientResult<void> setPost(const std::string& postFields);
     CurlClientResult<void> setWriteCallBack(WriteCallBackPointer func, void* userData);
     CurlClientResult<void> setBearerToken(const std::string& bearerToken);
+    CurlClientResult<void> setInstanceId(const std::string& instanceId);
+    CurlClientResult<void> addHeader(const std::string& headerKey, const std::string& headerValue);
     CurlClientResult<void> send();
 
 private:
     CURL* _handle {nullptr};
     struct curl_slist* _headers {nullptr};
+    std::unordered_map<std::string, std::string> _headerMap;
 };
 }
