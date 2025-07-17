@@ -27,6 +27,8 @@ public:
 
     bool setBearerToken(const std::string& token);
     void removeBearerToken();
+    bool setInstanceId(const std::string& instanceId);
+    void removeInstanceId();
 
     TuringClientError& getError() { return _result.error(); }
 
