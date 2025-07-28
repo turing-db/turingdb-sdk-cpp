@@ -127,9 +127,24 @@ bool TuringClient::loadGraph(const std::string& graph) {
     return _result.has_value();
 }
 
+void queryParameterBuilder(std::string& queryString,
+                                         const std::string& graph,
+                                         const std::string& commit,
+                                         const std::string& change) {
+    queryString += "graph=" + graph;
+    if (!commit.empty()) {
+        queryString += "&commit=" + commit;
+    }
+    if (!change.empty()) {
+        queryString += "&change=" + change;
+    }
+
+}
 bool TuringClient::query(const std::string& query,
                          const std::string& graph,
-                         std::vector<std::unique_ptr<TypedColumn>>& ret) {
+                         std::vector<std::unique_ptr<TypedColumn>>& ret,
+                         const std::string& commit,
+                         const std::string& change) {
     Profile profile {"TuringClient::query"};
 
     _buffer.clear();
@@ -142,7 +157,9 @@ bool TuringClient::query(const std::string& query,
         return size * nmemb;
     };
 
-    if (auto res = _handle->setUrl(_url + "/query?graph=" + graph); !res) {
+    std::string queryString = "/query?";
+    queryParameterBuilder(queryString,graph,commit,change);
+    if (auto res = _handle->setUrl(_url + queryString); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_QUERY_GRAPH, res.error());
         return false;
     }
