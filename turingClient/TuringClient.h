@@ -37,7 +37,9 @@ public:
     bool loadGraph(const std::string& graph);
     bool query(const std::string& query,
                const std::string& graph,
-               std::vector<std::unique_ptr<TypedColumn>>& ret);
+               std::vector<std::unique_ptr<TypedColumn>>& ret,
+               const std::string& commit = "",
+               const std::string& change = "");
 
 private:
     static size_t listAvailableGraphsCallBack(char* ptr, size_t size, size_t nmemb, void* userdata);
