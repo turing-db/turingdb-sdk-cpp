@@ -18,6 +18,14 @@ jobs:
             submodules: recursive
             # Ensure credentials are set for submodule fetches
             persist-credentials: true
+    - name: Check if macOS ARM
+      run: |
+        if [[ "$(uname -m)" == "arm64" ]]; then
+          echo "Platform is macOS ARM"
+        else
+          echo "Platform is not macOS ARM ($(uname -m))"
+          exit 1
+        fi
     - name: Install LLVM and recent clang
       run: brew install llvm -q 
     - name: Install dependencies
