@@ -1,4 +1,4 @@
-name: CI macos
+name: CI macos-arm
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: macos-15-large
+    runs-on: macos-latest-xlarge
 
     steps:
     - uses: actions/checkout@v4
