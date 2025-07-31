@@ -24,7 +24,7 @@ jobs:
       run: ./dependencies.sh
     - name: Configure cmake
       shell: bash
-      run: mkdir -p ${{ github.workspace }}/build && cd ${{ github.workspace }}/build && cmake ..
+      run: mkdir -p ${{ github.workspace }}/build && cd ${{ github.workspace }}/build && CC=/opt/homebrew/opt/llvm/bin/clang CXX=/opt/homebrew/opt/llvm/bin/clang++ cmake ..
     - name: Build
       shell: bash
       run: cd ${{ github.workspace }}/build && make
