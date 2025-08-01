@@ -11,19 +11,19 @@ namespace turingClient {
 class Path;
 
 enum class TuringClientErrorType : uint8_t {
-  UNKNOWN = 0,
-  CANNOT_SEND_POST_REQUEST,
-  TURING_QUERY_FAILED,
-  UNKNOWN_JSON_FORMAT,
-  INVALID_JSON_FORMAT,
-  UNKOWN_COLUMN_TYPE,
-  CANNOT_SET_BEARER_TOKEN,
-  CANNOT_LIST_AVAILABLE_GRAPHS,
-  CANNOT_LIST_LOADED_GRAPHS,
-  CANNOT_QUERY_GRAPH,
-  CANNOT_LOAD_GRAPH,
-  CANNOT_LOAD_HISTORY,
-  _SIZE,
+    UNKNOWN = 0,
+    CANNOT_SEND_POST_REQUEST,
+    TURING_QUERY_FAILED,
+    UNKNOWN_JSON_FORMAT,
+    INVALID_JSON_FORMAT,
+    UNKOWN_COLUMN_TYPE,
+    CANNOT_SET_BEARER_TOKEN,
+    CANNOT_LIST_AVAILABLE_GRAPHS,
+    CANNOT_LIST_LOADED_GRAPHS,
+    CANNOT_QUERY_GRAPH,
+    CANNOT_LOAD_GRAPH,
+    CANNOT_LOAD_HISTORY,
+    _SIZE,
 };
 
 using TuringClientErrorTypeDescription =
@@ -54,34 +54,43 @@ using TuringClientErrorTypeDescription =
 
 class TuringClientError {
 public:
-  TuringClientError() = default;
+    TuringClientError() = default;
 
-  explicit TuringClientError(TuringClientErrorType type) : _type(type) {}
+    explicit TuringClientError(TuringClientErrorType type)
+    :_type(type)
+    {
+    }
 
-  TuringClientError(TuringClientErrorType type, CurlClientError curlError)
-      : _type(type), _curlError(curlError) {}
+    TuringClientError(TuringClientErrorType type, CurlClientError curlError)
+        : _type(type),
+        _curlError(curlError)
+    {
+    }
 
-  TuringClientError(TuringClientErrorType type, const std::string &errorMsg)
-      : _type(type), _errorMsg(errorMsg) {}
+    TuringClientError(TuringClientErrorType type, const std::string &errorMsg)
+    : _type(type),
+    _errorMsg(errorMsg)
+    {
+    }
 
-  [[nodiscard]] TuringClientErrorType getType() const { return _type; }
-  [[nodiscard]] CurlClientError getCurlError() const { return _curlError; }
-  [[nodiscard]] const std::string &getErrorMsg() const { return _errorMsg; }
-  [[nodiscard]] std::string fmtMessage() const;
+    [[nodiscard]] TuringClientErrorType getType() const { return _type; }
+    [[nodiscard]] CurlClientError getCurlError() const { return _curlError; }
+    [[nodiscard]] const std::string &getErrorMsg() const { return _errorMsg; }
+    [[nodiscard]] std::string fmtMessage() const;
 
-  static BadResult<TuringClientError> result(TuringClientErrorType type) {
-    return BadResult<TuringClientError>(TuringClientError(type));
-  }
+    static BadResult<TuringClientError> result(TuringClientErrorType type) {
+        return BadResult<TuringClientError>(TuringClientError(type));
+    }
 
-  static BadResult<TuringClientError> result(TuringClientErrorType type,
-                                             CurlClientError curlError) {
-    return BadResult<TuringClientError>(TuringClientError(type, curlError));
-  }
+    static BadResult<TuringClientError> result(TuringClientErrorType type,
+                                               CurlClientError curlError) {
+        return BadResult<TuringClientError>(TuringClientError(type, curlError));
+    }
 
-  static BadResult<TuringClientError> result(TuringClientErrorType type,
-                                             const std::string &errorMsg) {
-    return BadResult<TuringClientError>(TuringClientError(type, errorMsg));
-  }
+    static BadResult<TuringClientError> result(TuringClientErrorType type,
+                                               const std::string &errorMsg) {
+        return BadResult<TuringClientError>(TuringClientError(type, errorMsg));
+    }
 
 private:
     TuringClientErrorType _type {};
