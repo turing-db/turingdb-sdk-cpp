@@ -288,8 +288,6 @@ size_t TuringClient::historyCallBack(char *ptr, size_t size, size_t nmemb,
     return size * nmemb;
   }
 
-  spdlog::info((*commitsIt).dump());
-
   auto jsonVec = (*commitsIt).get<std::vector<std::string>>();
   resultVals->stringResult.insert(resultVals->stringResult.begin(),
                                   jsonVec.begin(), jsonVec.end());
