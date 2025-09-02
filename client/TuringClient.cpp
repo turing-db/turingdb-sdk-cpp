@@ -2,7 +2,7 @@
 
 #include "Profiler.h"
 #include "JsonUtils.h"
-#include "CurlClient.h"
+#include "curl/CurlClient.h"
 
 #include <nlohmann/json.hpp>
 

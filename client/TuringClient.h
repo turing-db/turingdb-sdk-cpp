@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "CurlClient.h"
+#include "curl/CurlClient.h"
 #include "TuringClientResult.h"
 #include "CallBackSignatures.h"
 #include "TypedColumn.h"

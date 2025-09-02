@@ -89,7 +89,6 @@ find_package(CURL REQUIRED)
 
 add_subdirectory(common)
 add_subdirectory(base)
-add_subdirectory(curl)
 add_subdirectory(client)
 add_subdirectory(test)
 
