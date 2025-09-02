@@ -4,7 +4,7 @@
 
 #include "BasicResult.h"
 #include "EnumToString.h"
-#include "CurlClientResult.h"
+#include "curl/CurlClientResult.h"
 
 namespace turingClient {
 
