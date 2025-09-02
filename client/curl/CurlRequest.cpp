@@ -1,9 +1,6 @@
 #include "CurlRequest.h"
 
 #include <curl/curl.h>
-#include <iostream>
-
-#include "Profiler.h"
 
 using namespace turingClient;
 
@@ -40,8 +37,6 @@ bool CurlRequest::init() {
 }
 
 CurlClientResult<void> CurlRequest::addToSlist(const std::string& header) {
-    Profile profile {"CurlRequest::addHeader"};
-
     struct curl_slist* temp = curl_slist_append(_headers, header.c_str());
 
     if (!temp) {
@@ -54,19 +49,16 @@ CurlClientResult<void> CurlRequest::addToSlist(const std::string& header) {
 }
 
 void CurlRequest::clearHeaders() {
-    Profile profile {"CurlRequest::clearHeaders"};
     curl_slist_free_all(_headers);
     _headers = NULL;
 }
 
 CurlClientResult<void> CurlRequest::clearHeader(const std::string& headerKey) {
-    Profile profile {"CurlRequest::clearHeader"};
     _headerMap.erase(headerKey);
     return fillAllHeaders();
 }
 
 CurlClientResult<void> CurlRequest::fillAllHeaders() {
-    Profile profile {"CurlRequest::fillAllHeaders"};
 
     clearHeaders();
     for (const auto& [key, value] : _headerMap) {
@@ -80,7 +72,6 @@ CurlClientResult<void> CurlRequest::fillAllHeaders() {
 }
 
 CurlClientResult<void> CurlRequest::setBearerToken(const std::string& bearerToken) {
-    Profile profile {"CurlRequest::setBearerToken"};
 
     if (_headerMap.find("Authorization") != _headerMap.end()) {
         _headerMap["Authorization"] = "Bearer " + bearerToken;
@@ -99,7 +90,6 @@ CurlClientResult<void> CurlRequest::setBearerToken(const std::string& bearerToke
 
 CurlClientResult<void> CurlRequest::addHeader(const std::string& headerKey,
                                               const std::string& headerValue) {
-    Profile profile {"CurlRequest::addHeader"};
     if (_headerMap.find(headerKey) != _headerMap.end()) {
         _headerMap[headerKey] = headerValue;
         return fillAllHeaders();
@@ -115,8 +105,6 @@ CurlClientResult<void> CurlRequest::addHeader(const std::string& headerKey,
     return {};
 }
 CurlClientResult<void> CurlRequest::setInstanceId(const std::string& instanceId) {
-    Profile profile {"CurlRequest::setBearerToken"};
-
     if (_headerMap.find("Turing-Instance-Id") != _headerMap.end()) {
         _headerMap["Turing-Instance-Id"] = instanceId;
         return fillAllHeaders();
@@ -133,8 +121,6 @@ CurlClientResult<void> CurlRequest::setInstanceId(const std::string& instanceId)
 }
 
 CurlClientResult<void> CurlRequest::setUrl(const std::string& url) {
-    Profile profile {"CurlRequest::setUrl"};
-
     if (auto res = curl_easy_setopt(_handle, CURLOPT_URL, url.c_str()); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_URL, res);
     }
@@ -142,8 +128,6 @@ CurlClientResult<void> CurlRequest::setUrl(const std::string& url) {
 }
 
 CurlClientResult<void> CurlRequest::setPost(const std::string& postFields) {
-    Profile profile {"CurlRequest::setPost"};
-
     if (auto res = curl_easy_setopt(_handle, CURLOPT_POST, 1L); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_POST_REQUEST, res);
     }
@@ -160,8 +144,6 @@ CurlClientResult<void> CurlRequest::setPost(const std::string& postFields) {
 }
 
 CurlClientResult<void> CurlRequest::setWriteCallBack(WriteCallBackPointer func, void* userData) {
-    Profile profile {"CurlRequest::setWriteCallBack"};
-
     if (auto res = curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, func); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SET_WRITE_CALLBACK, res);
     }
@@ -173,8 +155,6 @@ CurlClientResult<void> CurlRequest::setWriteCallBack(WriteCallBackPointer func, 
 }
 
 CurlClientResult<void> CurlRequest::send() {
-    Profile profile {"CurlRequest::send"};
-
     if (auto res = curl_easy_perform(_handle); res != CURLE_OK) {
         if (res == CURLE_HTTP_RETURNED_ERROR) {
             long responseCode {};

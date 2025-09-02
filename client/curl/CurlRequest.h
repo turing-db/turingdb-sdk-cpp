@@ -1,10 +1,11 @@
 #pragma once
 
-#include <curl/curl.h>
 #include <stdexcept>
 #include <string>
 
-#include "CallBackSignatures.h"
+#include <curl/curl.h>
+
+#include "base/CallBackSignatures.h"
 #include "CurlClientResult.h"
 
 namespace turingClient {

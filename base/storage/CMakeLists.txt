@@ -1,2 +1,0 @@
-add_library(turing_client_cpp_typed_column INTERFACE)
-target_include_directories(turing_client_cpp_typed_column INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} )

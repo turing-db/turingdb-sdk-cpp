@@ -1,7 +1,6 @@
 #include "JsonUtils.h"
 
-#include "Profiler.h"
-#include "TypedColumn.h"
+#include "base/TypedColumn.h"
 
 using namespace turingClient;
 
@@ -24,8 +23,6 @@ turingClient::checkJsonError(const json& jsonMsg,
 TuringClientResult<void>
 turingClient::parseJson(char* location,
                         std::vector<std::unique_ptr<TypedColumn>>& result) {
-    Profile profile {"TuringClient::parseJson"};
-
     if (!location || !*location) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }

@@ -88,7 +88,6 @@ find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 
 add_subdirectory(common)
-add_subdirectory(base)
 add_subdirectory(client)
 add_subdirectory(test)
 

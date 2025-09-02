@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
-#include "TypedColumn.h"
+
+#include "base/TypedColumn.h"
 #include "JsonUtils.h"
 
 using namespace turingClient;
