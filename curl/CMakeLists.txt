@@ -14,3 +14,5 @@ target_link_libraries(turing_client_cpp_curl PRIVATE
     turing_common_s
     turing_client_cpp_common_headers)
 
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include/turingsdk)
+
