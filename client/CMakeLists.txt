@@ -13,3 +13,6 @@ target_link_libraries(turing_client_cpp_s PUBLIC
                     nlohmann_json
                     turing_client_cpp_typed_column
                     turing_client_cpp_common_headers)
+
+install(TARGETS turing_client_cpp_s)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include/turingsdk)
