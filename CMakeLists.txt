@@ -54,16 +54,6 @@ if(${CALLGRIND_PROFILE})
     add_definitions(-DCALLGRIND_PROFILE)
 endif()
 
-# Detect TURING_DEV
-set(TURING_DEV FALSE)
-if (DEFINED ENV{TURING_DEV})
-    set(TURING_DEV TRUE)
-endif()
-
-if (${TURING_DEV})
-    add_definitions(-DTURING_DEV)
-endif()
-
 # Debug settings
 if (${DEBUG_BUILD})
     message(STATUS "Debug build")
@@ -98,11 +88,7 @@ find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 
 add_subdirectory(base)
-if(NOT EXCLUDE_SAMPLES)
-add_subdirectory(samples)
-endif()
 add_subdirectory(turingcurlclient)
 add_subdirectory(turingClient)
-add_subdirectory(common)
 add_subdirectory(test)
 
