@@ -88,7 +88,7 @@ find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 
 add_subdirectory(base)
-add_subdirectory(turingcurlclient)
-add_subdirectory(turingClient)
+add_subdirectory(curl)
+add_subdirectory(client)
 add_subdirectory(test)
 
