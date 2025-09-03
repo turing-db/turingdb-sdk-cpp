@@ -2,6 +2,8 @@
 
 #include <curl/curl.h>
 
+#include <spdlog/fmt/bundled/format.h>
+
 using namespace turingsdk;
 
 std::string CurlClientError::fmtMessage() const {
