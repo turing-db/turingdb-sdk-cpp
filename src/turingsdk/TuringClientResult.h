@@ -1,7 +1,5 @@
 #pragma once
 
-#include <spdlog/fmt/bundled/format.h>
-
 #include "BasicResult.h"
 #include "EnumToString.h"
 #include "curl/CurlClientResult.h"
