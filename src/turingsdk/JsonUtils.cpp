@@ -4,44 +4,29 @@
 
 using namespace turingsdk;
 
-TuringClientResult<void>
-turingsdk::checkJsonError(const json& jsonMsg,
-                          const TuringClientErrorType& retErrType) {
-    if ((!jsonMsg.is_object())) {
+TuringClientResult JsonUtils::parseJson(char* str,
+                                        std::vector<std::unique_ptr<TypedColumn>>& result) {
+    if (!str || !*str) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    if (const auto jsonIt = jsonMsg.find("error"); jsonIt != jsonMsg.end()) {
-        const auto& errorMsg = jsonMsg["error"];
-        if (!(*jsonIt).is_null()) {
-            return TuringClientError::result(retErrType, errorMsg.get<std::string>());
-        }
-    }
-    return {};
-}
+    const auto jsonRes = nlohmann::json::parse(str, nullptr, false);
 
-TuringClientResult<void>
-turingsdk::parseJson(char* location,
-                     std::vector<std::unique_ptr<TypedColumn>>& result) {
-    if (!location || !*location) {
-        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
-    }
-
-    const json res = json::parse(location, nullptr, false);
-
-    if (res.is_discarded()) {
+    if (jsonRes.is_discarded()) {
         return TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
     }
 
-    if (auto ret = checkJsonError(res, turingsdk::TuringClientErrorType::TURING_QUERY_FAILED); !ret) {
+    if (auto ret = checkJsonError(jsonRes, turingsdk::TuringClientErrorType::TURING_QUERY_FAILED); !ret) {
         return ret;
     }
 
-    const auto headerIt = res.find("header");
-    if (headerIt == res.end()) {
+    // Read header
+    const auto headerIt = jsonRes.find("header");
+    if (headerIt == jsonRes.end()) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
+    // Search for column names and types
     const auto colNamesIt = headerIt->find("column_names");
     const auto colTypesIt = headerIt->find("column_types");
     if (colNamesIt == headerIt->end()
@@ -51,8 +36,9 @@ turingsdk::parseJson(char* location,
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    const auto dataIt = res.find("data");
-    if (dataIt == res.end()) {
+    // Search for data
+    const auto dataIt = jsonRes.find("data");
+    if (dataIt == jsonRes.end()) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
@@ -60,10 +46,11 @@ turingsdk::parseJson(char* location,
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
 
-    const auto colNames = (*colNamesIt).get<std::vector<std::string>>();
-    const auto colTypes = (*colTypesIt).get<std::vector<std::string>>();
-    const auto numCols = colNames.size();
+    const std::vector<std::string>& colNames = (*colNamesIt).get<std::vector<std::string>>();
+    const std::vector<std::string>& colTypes = (*colTypesIt).get<std::vector<std::string>>();
+    const size_t numCols = colNames.size();
 
+    // Create columns
     if (result.empty()) {
         for (size_t i = 0; i < numCols; ++i) {
             if (colTypes[i] == "String") {
@@ -80,6 +67,7 @@ turingsdk::parseJson(char* location,
         }
     }
 
+    // Add data to columns lambda
     const auto addData = [&]<SupportedValueType T>(size_t i, const auto& data) {
         using ActualType = std::conditional_t<isCustomBool<T>, bool, T>;
         auto* col = static_cast<Column<T>*>(result[i].get());
@@ -92,9 +80,27 @@ turingsdk::parseJson(char* location,
         }
     };
 
+    // Add data to columns
     for (const auto& data : (*dataIt)) {
         for (size_t i = 0; i < numCols; ++i) {
             TypeDispatcher {result[i].get()->columnType()}.execute(addData, i, data);
+        }
+    }
+
+    return {};
+}
+
+TuringClientResult JsonUtils::checkJsonError(const nlohmann::json& jsonMsg,
+                                             const TuringClientErrorType& retErrType) {
+    if (!jsonMsg.is_object()) {
+        return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
+    }
+
+    const auto jsonIt = jsonMsg.find("error");
+    if (jsonIt != jsonMsg.end()) {
+        const auto& errorMsg = jsonMsg["error"];
+        if (!(*jsonIt).is_null()) {
+            return TuringClientError::result(retErrType, errorMsg.get<std::string>());
         }
     }
 

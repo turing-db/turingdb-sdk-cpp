@@ -6,12 +6,17 @@
 
 namespace turingsdk {
 
-using json = nlohmann::json;
-
 class TypedColumn;
 
-TuringClientResult<void> checkJsonError(const json& jsonMsg,
-                                        const TuringClientErrorType& retErrType);
-TuringClientResult<void> parseJson(char* location,
-                                   std::vector<std::unique_ptr<TypedColumn>>& result);
+class JsonUtils {
+public:
+    static TuringClientResult parseJson(char* str,
+                          std::vector<std::unique_ptr<TypedColumn>>& result);
+
+    static TuringClientResult checkJsonError(const nlohmann::json& json,
+                                             const TuringClientErrorType& retErrType);
+
+    JsonUtils() = delete;
+};
+
 }

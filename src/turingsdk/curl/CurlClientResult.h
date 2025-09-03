@@ -1,13 +1,11 @@
 #pragma once
 
+#include <spdlog/fmt/bundled/format.h>
+
 #include "BasicResult.h"
 #include "EnumToString.h"
 
-#include <spdlog/fmt/bundled/format.h>
-
 namespace turingsdk {
-
-class Path;
 
 enum class CurlClientErrorType : uint8_t {
     UNKNOWN = 0,
@@ -82,6 +80,6 @@ private:
     long _httpErrorCode {0};
 };
 
-template <typename T>
-using CurlClientResult = BasicResult<T, class CurlClientError>;
+using CurlClientResult = BasicResult<void, class CurlClientError>;
+
 }
