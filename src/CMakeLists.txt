@@ -18,5 +18,6 @@ target_link_libraries(turing_client_cpp_s PUBLIC
                     nlohmann_json)
 
 install(TARGETS turing_client_cpp_s
-        LIBRARY DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+        LIBRARY DESTINATION lib)
+
+install(DIRECTORY turingdb/ DESTINATION include FILES_MATCHING PATTERN "*.h")
