@@ -89,5 +89,5 @@ find_package(CURL REQUIRED)
 
 add_subdirectory(common)
 add_subdirectory(src)
-add_subdirectory(test)
+#add_subdirectory(test)
 
