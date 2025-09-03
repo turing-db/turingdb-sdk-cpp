@@ -20,4 +20,4 @@ target_link_libraries(turing_client_cpp_s PUBLIC
 install(TARGETS turing_client_cpp_s
         LIBRARY DESTINATION lib)
 
-install(DIRECTORY turingdb/ DESTINATION include FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY turingsdk DESTINATION include FILES_MATCHING PATTERN "*.h")
