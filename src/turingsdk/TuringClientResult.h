@@ -6,7 +6,7 @@
 #include "EnumToString.h"
 #include "curl/CurlClientResult.h"
 
-namespace turingClient {
+namespace turingsdk {
 
 class Path;
 

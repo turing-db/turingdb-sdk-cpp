@@ -8,7 +8,7 @@
 #include "turingsdk/base/CallBackSignatures.h"
 #include "CurlClientResult.h"
 
-namespace turingClient {
+namespace turingsdk {
 
 class CurlRequest {
 public:

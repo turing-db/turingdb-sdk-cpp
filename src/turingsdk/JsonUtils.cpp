@@ -2,11 +2,11 @@
 
 #include "base/TypedColumn.h"
 
-using namespace turingClient;
+using namespace turingsdk;
 
 TuringClientResult<void>
-turingClient::checkJsonError(const json& jsonMsg,
-                             const TuringClientErrorType& retErrType) {
+turingsdk::checkJsonError(const json& jsonMsg,
+                          const TuringClientErrorType& retErrType) {
     if ((!jsonMsg.is_object())) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
@@ -21,8 +21,8 @@ turingClient::checkJsonError(const json& jsonMsg,
 }
 
 TuringClientResult<void>
-turingClient::parseJson(char* location,
-                        std::vector<std::unique_ptr<TypedColumn>>& result) {
+turingsdk::parseJson(char* location,
+                     std::vector<std::unique_ptr<TypedColumn>>& result) {
     if (!location || !*location) {
         return TuringClientError::result(TuringClientErrorType::UNKNOWN_JSON_FORMAT);
     }
@@ -33,7 +33,7 @@ turingClient::parseJson(char* location,
         return TuringClientError::result(TuringClientErrorType::INVALID_JSON_FORMAT);
     }
 
-    if (auto ret = checkJsonError(res, turingClient::TuringClientErrorType::TURING_QUERY_FAILED); !ret) {
+    if (auto ret = checkJsonError(res, turingsdk::TuringClientErrorType::TURING_QUERY_FAILED); !ret) {
         return ret;
     }
 

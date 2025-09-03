@@ -1,11 +1,12 @@
 #pragma once
+
 #include <nlohmann/json.hpp>
 
 #include "TuringClientResult.h"
 
-using json = nlohmann::json;
+namespace turingsdk {
 
-namespace turingClient {
+using json = nlohmann::json;
 
 class TypedColumn;
 

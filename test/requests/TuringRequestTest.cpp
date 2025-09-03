@@ -3,7 +3,7 @@
 #include "turingsdk/base/TypedColumn.h"
 #include "turingsdk/JsonUtils.h"
 
-using namespace turingClient;
+using namespace turingsdk;
 
 class TuringClientTest : public ::testing::Test {
 protected:
