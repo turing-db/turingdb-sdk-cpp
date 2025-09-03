@@ -81,14 +81,10 @@ execute_process(
 
 enable_testing()
 
-# Set preference for static libraries globally
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib")
-
 # threads
 find_package(Threads REQUIRED)
 
 # curl
-set(CURL_USE_STATIC_LIBS ON)
 find_package(CURL REQUIRED)
 
 add_subdirectory(common)
