@@ -7,7 +7,7 @@
 #include "base/CallBackSignatures.h"
 #include "base/TypedColumn.h"
 
-namespace turingClient {
+namespace turingsdk {
 
 class TuringClient {
 public:

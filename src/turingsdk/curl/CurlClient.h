@@ -4,7 +4,7 @@
 
 #include "CurlRequest.h"
 
-namespace turingClient {
+namespace turingsdk {
 
 class CurlClient {
 public:

@@ -1,11 +1,10 @@
 #include "CurlClient.h"
+
 #include <curl/curl.h>
-#include <iostream>
+
 #include <string>
 
-#include "Profiler.h"
-
-using namespace turingClient;
+using namespace turingsdk;
 
 CurlClient::CurlClient()
 {
@@ -13,7 +12,6 @@ CurlClient::CurlClient()
 }
 
 void CurlClient::init() {
-    Profile profile {"CurlClient::init"};
     curl_global_init(CURL_GLOBAL_ALL);
 }
 

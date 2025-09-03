@@ -5,7 +5,7 @@
 
 #include <spdlog/fmt/bundled/format.h>
 
-namespace turingClient {
+namespace turingsdk {
 
 class Path;
 

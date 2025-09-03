@@ -2,7 +2,7 @@
 
 #include <curl/curl.h>
 
-using namespace turingClient;
+using namespace turingsdk;
 
 std::string TuringClientError::fmtMessage() const {
     std::string turingRequestErrorString = fmt::format("Turing Request Error: {}", TuringClientErrorTypeDescription::value(_type));

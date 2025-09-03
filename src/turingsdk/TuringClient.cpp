@@ -1,12 +1,11 @@
 #include "TuringClient.h"
 
-#include "Profiler.h"
 #include "JsonUtils.h"
 #include "curl/CurlClient.h"
 
 #include <nlohmann/json.hpp>
 
-using namespace turingClient;
+using namespace turingsdk;
 using json = nlohmann::json;
 
 TuringClient::TuringClient(const std::string& url)
@@ -24,7 +23,6 @@ TuringClient::TuringClient(std::string&& url)
 }
 
 bool TuringClient::setBearerToken(const std::string& token) {
-    Profile profile {"TuringClient::setBearerToken"};
     if (auto res = _handle->addHeader("Authorization", "Bearer " + token); !res) {
         _result = TuringClientError::result(
             TuringClientErrorType::CANNOT_SET_BEARER_TOKEN, res.error());
@@ -35,12 +33,10 @@ bool TuringClient::setBearerToken(const std::string& token) {
 }
 
 void TuringClient::removeBearerToken() {
-    Profile profile {"TuringClient::removeBearerToken"};
     _handle->clearHeader("Authorization");
 }
 
 bool TuringClient::setInstanceId(const std::string& instanceId) {
-    Profile profile {"TuringClient::setInstanceId"};
     if (auto res = _handle->addHeader("Turing-Instance-Id", instanceId); !res) {
         _result = TuringClientError::result(
             TuringClientErrorType::CANNOT_SET_BEARER_TOKEN, res.error());
@@ -51,13 +47,10 @@ bool TuringClient::setInstanceId(const std::string& instanceId) {
 }
 
 void TuringClient::removeInstanceId() {
-    Profile profile {"TuringClient::removeInstanceId"};
     _handle->clearHeader("Turing-Instance-Id");
 }
 
 bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
-    Profile profile {"TuringClient::listLoadedGraphs"};
-
     auto vals = std::make_unique<callbackReturnValues>(_result, ret);
     if (auto res = _handle->setUrl(_url + "/list_avail_graphs"); !res) {
         _result = TuringClientError::result(TuringClientErrorType::CANNOT_LIST_AVAILABLE_GRAPHS, res.error());
@@ -83,8 +76,6 @@ bool TuringClient::listAvailableGraphs(std::vector<std::string>& ret) {
 }
 
 bool TuringClient::listLoadedGraphs(std::vector<std::string>& ret) {
-    Profile profile {"TuringClient::listLoadedGraphs"};
-
     auto vals = std::make_unique<callbackReturnValues>(_result, ret);
     if (auto res = _handle->setUrl(_url + "/list_loaded_graphs"); !res) {
         _result = TuringClientError::result(
@@ -112,8 +103,6 @@ bool TuringClient::listLoadedGraphs(std::vector<std::string>& ret) {
 }
 
 bool TuringClient::loadGraph(const std::string& graph) {
-    Profile profile {"TuringClient::loadGraph"};
-
     if (auto res = _handle->setWriteCallBack(loadGraphCallBack,
                                              static_cast<void*>(&_result)); !res) {
         _result = TuringClientError::result(
@@ -156,8 +145,6 @@ bool TuringClient::query(const std::string& query,
                          std::vector<std::unique_ptr<TypedColumn>>& ret,
                          const std::string& commit,
                          const std::string& change) {
-    Profile profile {"TuringClient::query"};
-
     _buffer.clear();
 
     WriteCallBack func = [this](char* ptr, size_t size, size_t nmemb,
@@ -206,8 +193,6 @@ bool TuringClient::history(std::vector<std::string>& ret,
                            const std::string& graph,
                            const std::string& commit,
                            const std::string& change) {
-    Profile profile {"TuringClient::history"};
-
     auto vals = std::make_unique<callbackReturnValues>(_result, ret);
 
     std::string urlParameters = "/history?";

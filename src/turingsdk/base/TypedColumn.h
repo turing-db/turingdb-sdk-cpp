@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-namespace turingClient {
+namespace turingsdk {
 
 struct CustomBool {
     CustomBool() = default;

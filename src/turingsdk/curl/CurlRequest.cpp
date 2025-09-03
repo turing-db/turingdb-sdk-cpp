@@ -2,7 +2,7 @@
 
 #include <curl/curl.h>
 
-using namespace turingClient;
+using namespace turingsdk;
 
 bool CurlRequest::init() {
     if (auto res = curl_easy_setopt(_handle, CURLOPT_TCP_NODELAY, 1L); res != CURLE_OK) {
