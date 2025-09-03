@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 #include "CurlClientResult.h"
 
@@ -16,7 +16,7 @@ public:
 
     Buffer& getBuffer() { return _buffer; }
 
-    void addHeader(const std::string& headerKey, const std::string& headerValue);
+    void setHeader(const std::string& headerKey, const std::string& headerValue);
     void setUrl(const std::string& url);
 
     void setPostData(const std::string& data);
@@ -26,6 +26,7 @@ public:
 
 private:
     void* _curl {nullptr};
+    std::unordered_map<std::string, std::string> _headers;
     Buffer _buffer;
 };
 
