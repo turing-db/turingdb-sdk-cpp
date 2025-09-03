@@ -38,9 +38,8 @@ CurlClient::~CurlClient() {
     }
 }
 
-void CurlClient::addHeader(const std::string& headerKey, const std::string& headerValue) {
-    const std::string headerString = headerKey + ": " + headerValue;
-    curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headerString.c_str());
+void CurlClient::setHeader(const std::string& headerKey, const std::string& headerValue) {
+    _headers[headerKey] = headerValue;
 }
 
 void CurlClient::setUrl(const std::string& url) {
@@ -48,8 +47,19 @@ void CurlClient::setUrl(const std::string& url) {
 }
 
 CurlClientResult CurlClient::send() {
+    struct curl_slist* headers = nullptr;
+    for (const auto& header : _headers) {
+        headers = curl_slist_append(headers, (header.first + ": " + header.second).c_str());
+    }
+
+    curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, headers);
+
     if (auto res = curl_easy_perform(_curl); res != CURLE_OK) {
         return CurlClientError::result(CurlClientErrorType::CANNOT_SEND_REQUEST, res);
+    }
+
+    if (headers) {
+        curl_slist_free_all(headers);
     }
 
     return {};

@@ -10,8 +10,8 @@ using namespace turingsdk;
 TuringClient::TuringClient(const TuringClientConfig& config)
     : _config(config)
 {
-    _client.addHeader("Authorization", "Bearer " + _config.getBearerToken());
-    _client.addHeader("Turing-Instance-Id", _config.getInstanceID());
+    _client.setHeader("Authorization", "Bearer " + _config.getBearerToken());
+    _client.setHeader("Turing-Instance-Id", _config.getInstanceID());
 }
 
 TuringClient::~TuringClient() {
