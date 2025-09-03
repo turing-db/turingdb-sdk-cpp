@@ -14,7 +14,7 @@ public:
     CurlClient();
     ~CurlClient();
 
-    Buffer& getBuffer();
+    Buffer& getBuffer() { return _buffer; }
 
     void addHeader(const std::string& headerKey, const std::string& headerValue);
     void setUrl(const std::string& url);
