@@ -98,7 +98,6 @@ private:
     std::string _errorMsg;
 };
 
-template <typename T>
-using TuringClientResult = BasicResult<T, class TuringClientError>;
+using TuringClientResult = BasicResult<void, class TuringClientError>;
 
 }

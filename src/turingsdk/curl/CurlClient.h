@@ -1,30 +1,32 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
-#include "CurlRequest.h"
+#include "CurlClientResult.h"
 
 namespace turingsdk {
 
 class CurlClient {
 public:
-    CurlRequest* createHandle();
+    using Buffer = std::vector<char>;
 
-    std::vector<std::unique_ptr<CurlRequest>>& getHandles() { return _handles; }
-
-    static CurlClient& getCurlClient() {
-        static CurlClient client;
-        return client;
-    }
-
-private:
     CurlClient();
-    CurlClient(CurlClient&) = delete;
-    CurlClient(CurlClient&&) = delete;
     ~CurlClient();
 
-    void init();
+    Buffer& getBuffer();
 
-    std::vector<std::unique_ptr<CurlRequest>> _handles;
+    void addHeader(const std::string& headerKey, const std::string& headerValue);
+    void setUrl(const std::string& url);
+
+    void setPostData(const std::string& data);
+    void clearPostData();
+
+    CurlClientResult send();
+
+private:
+    void* _curl {nullptr};
+    Buffer _buffer;
 };
+
 }

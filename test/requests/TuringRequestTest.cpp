@@ -42,7 +42,7 @@ TEST_F(TuringClientTest, jsonValidParseTests) {
     expected.push_back(&col4);
 
     std::vector<std::unique_ptr<TypedColumn>> cols;
-    auto res = parseJson(jsonResult.data(), cols);
+    auto res = JsonUtils::parseJson(jsonResult.data(), cols);
     ASSERT_TRUE(res);
 
     ASSERT_EQ(cols.size(), 4);
@@ -59,7 +59,7 @@ TEST_F(TuringClientTest, jsonInvalidFormatTest) {
     std::string jsonBadFormat = "{\"header\":{\"col_names\":[\"n\",\"n.name\",\"e.duration\",\"m.hasPhD\"],\"column_types\":[\"UInt64\",\"String\",\"Int64\",\"Bool\"]},\"data\":[[[0,0,0,0,1,1,1,6,8,8,9,9,11],[\"Remy\",\"Remy\",\"Remy\",\"Remy\",\"Adam\",\"Adam\",\"Adam\",\"Ghosts\",\"Maxime\",\"Maxime\",\"Luc\",\"Luc\",\"Martina\"],[20,20,null,20,20,null,null,200,null,null,20,15,10],[true,null,null,null,true,null,null,true,null,null,null,null,null]]],\"time\":0.206431}";
 
     std::vector<std::unique_ptr<TypedColumn>> cols;
-    auto res = parseJson(jsonBadFormat.data(), cols);
+    auto res = JsonUtils::parseJson(jsonBadFormat.data(), cols);
     ASSERT_FALSE(res);
     ASSERT_EQ(res.error().getType(), TuringClientErrorType::UNKNOWN_JSON_FORMAT);
 }
@@ -68,7 +68,7 @@ TEST_F(TuringClientTest, jsonEmptyStringTest) {
     std::string jsonEmptyString;
     std::vector<std::unique_ptr<TypedColumn>> cols;
 
-    auto res = parseJson(jsonEmptyString.data(), cols);
+    auto res = JsonUtils::parseJson(jsonEmptyString.data(), cols);
     ASSERT_FALSE(res);
     ASSERT_EQ(res.error().getType(), TuringClientErrorType::UNKNOWN_JSON_FORMAT);
 }
@@ -77,7 +77,7 @@ TEST_F(TuringClientTest, jsonEmptyObjectTest) {
     std::string jsonEmptyObject = "{}";
     std::vector<std::unique_ptr<TypedColumn>> cols;
 
-    auto res = parseJson(jsonEmptyObject.data(), cols);
+    auto res = JsonUtils::parseJson(jsonEmptyObject.data(), cols);
     ASSERT_FALSE(res);
     ASSERT_EQ(res.error().getType(), TuringClientErrorType::UNKNOWN_JSON_FORMAT);
 }
@@ -86,7 +86,7 @@ TEST_F(TuringClientTest, jsonNoArrayTest) {
     std::string jsonNoArray = "{\"key\":0}";
     std::vector<std::unique_ptr<TypedColumn>> cols;
 
-    auto res = parseJson(jsonNoArray.data(), cols);
+    auto res = JsonUtils::parseJson(jsonNoArray.data(), cols);
     ASSERT_FALSE(res);
     ASSERT_EQ(res.error().getType(), TuringClientErrorType::UNKNOWN_JSON_FORMAT);
 }
@@ -97,7 +97,7 @@ TEST_F(TuringClientTest, jsonInvalidColumnType) {
 
 
     std::vector<std::unique_ptr<TypedColumn>> cols;
-    auto res = parseJson(jsonInvalidColumnType.data(), cols);
+    auto res = JsonUtils::parseJson(jsonInvalidColumnType.data(), cols);
     ASSERT_FALSE(res);
     ASSERT_EQ(res.error().getType(), TuringClientErrorType::UNKOWN_COLUMN_TYPE);
 }
@@ -106,7 +106,7 @@ TEST_F(TuringClientTest, jsonErrorTest) {
     std::string jsonNoArray = "{\"error\":\"PLAN ERROR\"}";
     std::vector<std::unique_ptr<TypedColumn>> cols;
 
-    auto res = parseJson(jsonNoArray.data(), cols);
+    auto res = JsonUtils::parseJson(jsonNoArray.data(), cols);
     ASSERT_FALSE(res);
     ASSERT_EQ(res.error().getType(), TuringClientErrorType::TURING_QUERY_FAILED);
     ASSERT_EQ(res.error().getErrorMsg(), "PLAN ERROR");

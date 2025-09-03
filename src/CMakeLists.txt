@@ -4,8 +4,7 @@ add_library(turing_client_cpp_s STATIC
     turingsdk/JsonUtils.cpp
 
     turingsdk/curl/CurlClient.cpp
-    turingsdk/curl/CurlClientResult.cpp
-    turingsdk/curl/CurlRequest.cpp)
+    turingsdk/curl/CurlClientResult.cpp)
 
 target_include_directories(turing_client_cpp_s PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
