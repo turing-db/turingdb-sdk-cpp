@@ -1,19 +1,22 @@
 add_library(turing_client_cpp_s STATIC
-    TuringClient.cpp
-    TuringClientResult.cpp
-    JsonUtils.cpp
+    turingsdk/TuringClient.cpp
+    turingsdk/TuringClientResult.cpp
+    turingsdk/JsonUtils.cpp
 
-    curl/CurlClient.cpp
-    curl/CurlClientResult.cpp
-    curl/CurlRequest.cpp)
+    turingsdk/curl/CurlClient.cpp
+    turingsdk/curl/CurlClientResult.cpp
+    turingsdk/curl/CurlRequest.cpp)
 
 target_include_directories(turing_client_cpp_s PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Curl
 target_include_directories(turing_client_cpp_s PRIVATE ${CURL_INCLUDE_DIRS})
 target_link_libraries(turing_client_cpp_s PRIVATE ${CURL_LIBRARIES})
+
 target_link_libraries(turing_client_cpp_s PUBLIC
                     turing_common_s
                     nlohmann_json)
 
-install(TARGETS turing_client_cpp_s)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION include/turingsdk)
+install(TARGETS turing_client_cpp_s
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include)

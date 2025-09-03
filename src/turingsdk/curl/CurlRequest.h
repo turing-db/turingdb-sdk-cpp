@@ -5,7 +5,7 @@
 
 #include <curl/curl.h>
 
-#include "base/CallBackSignatures.h"
+#include "turingsdk/base/CallBackSignatures.h"
 #include "CurlClientResult.h"
 
 namespace turingClient {
