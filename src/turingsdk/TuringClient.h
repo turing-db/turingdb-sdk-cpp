@@ -35,4 +35,5 @@ private:
     const TuringClientConfig& _config;
     CurlClient _client;
 };
+
 }
