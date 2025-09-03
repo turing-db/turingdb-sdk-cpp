@@ -1,6 +1,6 @@
 #include "TuringClientResult.h"
 
-#include <curl/curl.h>
+#include <spdlog/fmt/bundled/format.h>
 
 using namespace turingsdk;
 
